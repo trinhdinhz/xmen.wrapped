@@ -13,6 +13,10 @@ google-genai>=0.1.0
 requests>=2.31.0
 
 ---
+~ Về table tracks bên SQL:
+Lưu URL các link bên *cloudinary* rồi chạy ngon lành luôn.
+
+---
 ~ Sau khi lưu các file bên vào máy, nhớ chỉnh sửa lại mấy khúc đầu cho hợp với đường dẫn để gọi code nha!
 ~ Thứ tự chạy code:
 
