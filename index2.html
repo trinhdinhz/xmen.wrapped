@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+  <title>X-Men Wrapped 2026</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Andada+Pro:ital,wght@0,400..800;1,400..800&family=Anek+Bangla:wght@700;800&family=Archivo+Black&family=Be+Vietnam+Pro:wght@400;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Thư viện lưu ảnh thẻ Wrapped -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #0c0c0c;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Khung Story chuẩn 9:16 (380x675) */
+    .story-viewport {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      height: 675px;
+      border-radius: 36px;
+      overflow: hidden;
+      background-color: #292929;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+      border: 1px solid #333333;
+    }
+
+    /* Lớp phủ mở đầu để unlock Autoplay trình duyệt */
+    .start-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(12, 12, 12, 0.94);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      transition: opacity 0.4s ease, visibility 0.4s;
+      cursor: pointer;
+    }
+    .start-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .start-btn {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: #CFB23C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 35px rgba(207, 178, 60, 0.6);
+      animation: pulseBtn 1.8s infinite;
+    }
+    @keyframes pulseBtn {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Thanh tiến trình Story trên đỉnh */
+    .story-progress-bar {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      gap: 5px;
+      z-index: 100;
+    }
+    .progress-segment {
+      flex: 1;
+      height: 2.5px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #FFFFFF;
+      transition: width 0.1s linear;
+    }
+
+    /* Vùng chạm điều hướng trái/phải */
+    .nav-touch-left, .nav-touch-right {
+      position: absolute;
+      top: 40px;
+      bottom: 50px;
+      width: 35%;
+      z-index: 90;
+      cursor: pointer;
+    }
+    .nav-touch-left { left: 0; }
+    .nav-touch-right { right: 0; }
+
+    /* Quản lý hiển thị các Slide */
+    .story-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.97);
+      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1;
+    }
+    .story-slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+      z-index: 10;
+    }
+
+    /* Animations xuất hiện phần tử con */
+    .story-slide.active .anim-fade-up {
+      animation: animFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .story-slide.active .anim-pop {
+      animation: animPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.32s; opacity: 0; }
+
+    @keyframes animFadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes animPop {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .archivo-font { font-family: 'Archivo Black', sans-serif; }
+    .big-number-wrapped {
+      font-family: 'Archivo Black', sans-serif;
+      color: #988CFF;
+      paint-order: stroke fill;
+      line-height: 0.8;
+      letter-spacing: -0.06em;
+    }
+    
+    /* Equalizer Bar Slide 4 */
+    @keyframes eqWave {
+      0%, 100% { height: 3px; }
+      50% { height: 13px; }
+    }
+    .eq-bar {
+      width: 2px;
+      background: #E55541;
+      border-radius: 1px;
+      animation: eqWave 0.75s ease-in-out infinite;
+    }
+    .eq-bar:nth-child(1) { animation-delay: 0.15s; }
+    .eq-bar:nth-child(2) { animation-delay: 0.35s; }
+    .eq-bar:nth-child(3) { animation-delay: 0.05s; }
+    .eq-bar:nth-child(4) { animation-delay: 0.25s; }
+
+    /* Modal kết thúc Slide 5 */
+    .end-modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(12, 12, 12, 0.82);
+      backdrop-filter: blur(8px);
+      z-index: 280;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s;
+      pointer-events: none;
+    }
+    .end-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .end-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .btn-action {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s ease, filter 0.15s ease, background-color 0.2s ease;
+      border: none;
+      outline: none;
+    }
+    .btn-action:active {
+      transform: scale(0.97);
+    }
+    .btn-save {
+      background: #BEE860;
+      color: #121212;
+      box-shadow: 0 6px 18px rgba(190, 232, 96, 0.35);
+    }
+    .btn-gift {
+      background: #141c22;
+      color: #00e5ff;
+      border: 1.5px solid #00e5ff;
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.28);
+    }
+    .btn-gift:active {
+      background: #00e5ff;
+      color: #0c0c0c;
+    }
+    .btn-secondary {
+      background: #242424;
+      color: #F0F0EB;
+      border: 1px solid #383838;
+    }
+
+    /* Hiệu ứng quét sáng Discount */
+    @keyframes sweepAnim {
+      0% { left: -150%; }
+      35%, 100% { left: 200%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="story-viewport" id="storyViewport">
+    
+    <!-- LỚP PHỦ BẮT ĐẦU ÂM THANH -->
+    <div class="start-overlay" id="startOverlay" onclick="startStoryExperience()">
+      <div class="start-btn">
+        <svg style="width: 36px; height: 36px; margin-left: 5px;" viewBox="0 0 24 24" fill="#000">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </div>
+      <p style="margin-top: 18px; font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #CFB23C;">
+        Chạm để bắt đầu
+      </p>
+    </div>
+
+    <!-- THANH TIẾN TRÌNH 5 SLIDE -->
+    <div class="story-progress-bar">
+      <div class="progress-segment"><div class="progress-fill" id="prog-0"></div></div>
+      <div class="progress-segment"><div class="progress-fill" id="prog-1"></div></div>
+      <div class="progress-segment"><div class="progress-fill" id="prog-2"></div></div>
+      <div class="progress-segment"><div class="progress-fill" id="prog-3"></div></div>
+      <div class="progress-segment"><div class="progress-fill" id="prog-4"></div></div>
+    </div>
+
+    <!-- TOUCH CONTROLLER -->
+    <div class="nav-touch-left" onclick="prevSlide()"></div>
+    <div class="nav-touch-right" onclick="nextSlide()"></div>
+
+    <!-- ================= SLIDE 1 (TUỔI THẬT VS TUỔI CHÂN TÓC) ================= -->
+    <div class="story-slide active" id="slide-0">
+      <div style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+        <svg style="width: 100%; height: 100%;" viewBox="0 0 1080 1920" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_54_866)">
+            <rect width="1080" height="1920" fill="#292929"/>
+            <g clip-path="url(#clip1_54_866)">
+              <path d="M1347.92 141.258C1379.08 141.258 1404.34 115.996 1404.34 84.832C1404.34 53.6683 1379.08 28.4062 1347.92 28.4062C1316.75 28.4062 1291.49 53.6683 1291.49 84.832C1291.49 115.996 1316.75 141.258 1347.92 141.258ZM1454.5 254.109C1485.66 254.109 1510.93 228.847 1510.93 197.684C1510.93 166.52 1485.66 141.258 1454.5 141.258C1423.34 141.258 1398.07 166.52 1398.07 197.684C1398.07 228.847 1423.34 254.109 1454.5 254.109ZM1241.34 254.109C1272.5 254.109 1297.76 228.847 1297.76 197.684C1297.76 166.52 1272.5 141.258 1241.34 141.258C1210.17 141.258 1184.91 166.52 1184.91 197.684C1184.91 228.847 1210.17 254.109 1241.34 254.109ZM1134.75 141.258C1165.92 141.258 1191.18 115.996 1191.18 84.832C1191.18 53.6683 1165.92 28.4062 1134.75 28.4062C1103.59 28.4062 1078.33 53.6683 1078.33 84.832C1078.33 115.996 1103.59 141.258 1134.75 141.258ZM921.59 141.258C952.754 141.258 978.016 115.996 978.016 84.832C978.016 53.6683 952.754 28.4062 921.59 28.4062C890.426 28.4062 865.164 53.6683 865.164 84.832C865.164 115.996 890.426 141.258 921.59 141.258ZM1028.17 254.109C1059.34 254.109 1084.6 228.847 1084.6 197.684C1084.6 166.52 1059.34 141.258 1028.17 141.258C997.008 141.258 971.746 166.52 971.746 197.684C971.746 228.847 997.008 254.109 1028.17 254.109ZM1987.41 -310.148C2018.57 -310.148 2043.84 -335.41 2043.84 -366.574C2043.84 -397.738 2018.57 -423 1987.41 -423C1956.25 -423 1930.98 -397.738 1930.98 -366.574C1930.98 -335.41 1956.25 -310.148 1987.41 -310.148ZM2093.99 254.109C2125.16 254.109 2150.42 228.847 2150.42 197.684C2150.42 166.52 2125.16 141.258 2093.99 141.258C2062.83 141.258 2037.57 166.52 2037.57 197.684C2037.57 228.847 2062.83 254.109 2093.99 254.109ZM2093.99 -84.4453C2062.83 -84.4453 2037.57 -59.1833 2037.57 -28.0195C2037.57 3.14423 2062.83 28.4062 2093.99 28.4062C2125.16 28.4062 2150.42 3.14423 2150.42 -28.0195C2150.42 -59.1833 2125.16 -84.4453 2093.99 -84.4453ZM1667.66 254.109C1698.83 254.109 1724.09 228.847 1724.09 197.684C1667.66 254.109 1611.24 197.684 1611.24 197.684C1611.24 228.847 1636.5 254.109 1667.66 254.109ZM815.008 254.109C846.172 254.109 871.434 228.847 871.434 197.684C871.434 166.52 846.172 141.258 815.008 141.258C783.844 141.258 758.582 166.52 758.582 197.684C758.582 228.847 783.844 254.109 815.008 254.109ZM1774.25 141.258C1805.41 141.258 1830.67 115.996 1830.67 84.832C1830.67 53.6683 1805.41 28.4062 1774.25 28.4062C1743.08 28.4062 1717.82 53.6683 1717.82 84.832C1717.82 115.996 1743.08 141.258 1774.25 141.258ZM1880.83 254.109C1911.99 254.109 1937.25 228.847 1937.25 197.684C1937.25 166.52 1911.99 141.258 1880.83 141.258C1849.66 141.258 1824.4 166.52 1824.4 197.684C1824.4 228.847 1849.66 254.109 1880.83 254.109ZM1880.83 -197.297C1911.99 -197.297 1937.25 -222.559 1937.25 -253.723C1937.25 -284.886 1911.99 -310.148 1880.83 -310.148C1849.66 -310.148 1824.4 -284.886 1824.4 -253.723C1824.4 -222.559 1849.66 -197.297 1880.83 -197.297ZM1987.41 141.258C2018.57 141.258 2043.84 115.996 2043.84 84.832C2043.84 53.6683 2018.57 28.4062 1987.41 28.4062C1956.25 28.4062 1930.98 53.6683 1930.98 84.832C1930.98 115.996 1956.25 141.258 1987.41 141.258ZM1987.41 -84.4453C2018.57 -84.4453 2043.84 -109.707 2043.84 -140.871C2043.84 -172.035 2018.57 -197.297 1987.41 -197.297C1956.25 -197.297 1930.98 -172.035 1930.98 -140.871C1930.98 -109.707 1956.25 -84.4453 1987.41 -84.4453ZM1774.25 -197.297C1743.08 -197.297 1717.82 -172.035 1717.82 -140.871C1717.82 -109.707 1743.08 -84.4453 1774.25 -84.4453C1805.41 -84.4453 1830.67 -109.707 1830.67 -140.871C1830.67 -172.035 1805.41 -197.297 1774.25 -197.297ZM1561.08 -197.297C1529.92 -197.297 1504.66 -172.035 1504.66 -140.871C1504.66 -109.707 1529.92 -84.4453 1561.08 -84.4453C1592.25 -84.4453 1617.51 -109.707 1617.51 -140.871C1617.51 -172.035 1592.25 -197.297 1561.08 -197.297ZM1667.66 -84.4453C1636.5 -84.4453 1611.24 -59.1833 1611.24 -28.0195C1611.24 3.14423 1636.5 28.4062 1667.66 28.4062C1698.83 28.4062 1724.09 3.14423 1724.09 -28.0195C1724.09 -59.1833 1698.83 -84.4453 1667.66 -84.4453ZM2200.57 -310.148C2231.74 -310.148 2257 -335.41 2257 -366.574C2257 -397.738 2231.74 -423 2200.57 -423C2169.41 -423 2144.15 -397.738 2144.15 -366.574C2144.15 -335.41 2169.41 -310.148 2200.57 -310.148ZM1880.83 -84.4453C1849.66 -84.4453 1824.4 -59.1833 1824.4 -28.0195C1824.4 3.14423 1849.66 28.4062 1880.83 28.4062C1911.99 28.4062 1937.25 3.14423 1937.25 -28.0195C1937.25 -59.1833 1911.99 -84.4453 1880.83 -84.4453ZM2093.99 -197.297C2125.16 -197.297 2150.42 -222.559 2150.42 -253.723C2150.42 -284.886 2125.16 -310.148 2093.99 -310.148C2062.83 -310.148 2037.57 -284.886 2037.57 -253.723C2037.57 -222.559 2062.83 -197.297 2093.99 -197.297ZM1241.34 -84.4453C1210.17 -84.4453 1184.91 -59.1833 1184.91 -28.0195C1184.91 3.14423 1210.17 28.4062 1241.34 28.4062C1272.5 28.4062 1297.76 3.14423 1297.76 -28.0195C1297.76 -59.1833 1272.5 -84.4453 1241.34 -84.4453ZM1454.5 -84.4453C1423.34 -84.4453 1398.07 -59.1833 1398.07 -28.0195C1398.07 3.14423 1423.34 28.4062 1454.5 28.4062C1485.66 28.4062 1510.93 3.14423 1510.93 -28.0195C1510.93 -59.1833 1485.66 -84.4453 1454.5 -84.4453ZM921.59 -197.297C890.426 -197.297 865.164 -172.035 865.164 -140.871C865.164 -109.707 890.426 -84.4453 921.59 -84.4453C952.754 -84.4453 978.016 -109.707 978.016 -140.871C978.016 -172.035 952.754 -197.297 921.59 -197.297ZM1134.75 -197.297C1103.59 -197.297 1078.33 -172.035 1078.33 -140.871C1078.33 -109.707 1103.59 -84.4453 1134.75 -84.4453C1165.92 -84.4453 1191.18 -109.707 1191.18 -140.871C1191.18 -172.035 1165.92 -197.297 1134.75 -197.297ZM1028.17 -84.4453C997.008 -84.4453 971.746 -59.1833 971.746 -28.0195C971.746 3.14423 997.008 28.4062 1028.17 28.4062C1059.34 28.4062 1084.6 3.14423 1084.6 -28.0195C1084.6 -59.1833 1059.34 -84.4453 1028.17 -84.4453ZM815.008 -84.4453C783.844 -84.4453 758.582 -59.1833 758.582 -28.0195C758.582 3.14423 783.844 28.4062 815.008 28.4062C846.172 28.4062 871.434 3.14423 871.434 -28.0195C871.434 -59.1833 846.172 -84.4453 815.008 -84.4453ZM1347.92 -197.297C1316.75 -197.297 1291.49 -172.035 1291.49 -140.871C1291.49 -109.707 1316.75 -84.4453 1347.92 -84.4453C1379.08 -84.4453 1404.34 -109.707 1404.34 -140.871C1404.34 -172.035 1379.08 -197.297 1347.92 -197.297ZM1561.08 141.258C1592.25 141.258 1617.51 115.996 1617.51 84.832C1617.51 53.6683 1592.25 28.4062 1561.08 28.4062C1529.92 28.4062 1504.66 53.6683 1504.66 84.832C1504.66 115.996 1529.92 141.258 1561.08 141.258ZM1347.92 254.109C1316.75 254.109 1291.49 279.371 1291.49 310.535C1291.49 341.699 1316.75 366.961 1347.92 366.961C1379.08 366.961 1404.34 341.699 1404.34 310.535C1404.34 279.371 1379.08 254.109 1347.92 254.109ZM1454.5 366.961C1423.34 366.961 1398.07 392.223 1398.07 423.387C1398.07 454.55 1423.34 479.812 1454.5 479.812C1485.66 479.812 1510.93 454.55 1510.93 423.387C1510.93 392.223 1485.66 366.961 1454.5 366.961ZM921.59 254.109C890.426 254.109 865.164 279.371 865.164 310.535C865.164 341.699 890.426 366.961 890.426 366.961C952.754 366.961 978.016 341.699 978.016 310.535C978.016 279.371 952.754 254.109 921.59 254.109ZM1134.75 254.109C1103.59 254.109 1078.33 279.371 1078.33 310.535C1078.33 341.699 1103.59 366.961 1134.75 366.961C1165.92 366.961 1191.18 341.699 1191.18 310.535C1191.18 279.371 1165.92 254.109 1134.75 254.109ZM1774.25 -310.148C1805.41 -310.148 1830.67 -335.41 1830.67 -366.574C1830.67 -397.738 1805.41 -423 1774.25 -423C1743.08 -423 1717.82 -397.738 1717.82 -366.574C1717.82 -335.41 1743.08 -310.148 1774.25 -310.148ZM1667.66 366.961C1636.5 366.961 1611.24 392.223 1611.24 423.387C1611.24 454.55 1636.5 479.812 1667.66 479.812C1698.83 479.812 1724.09 454.55 1724.09 423.387C1724.09 392.223 1698.83 366.961 1667.66 366.961ZM1241.34 366.961C1210.17 366.961 1184.91 392.223 1184.91 423.387C1184.91 454.55 1210.17 479.812 1241.34 479.812C1272.5 479.812 1297.76 454.55 1297.76 423.387C1297.76 392.223 1272.5 366.961 1241.34 366.961ZM1561.08 254.109C1529.92 254.109 1504.66 279.371 1504.66 310.535C1504.66 341.699 1529.92 366.961 1561.08 366.961C1592.25 366.961 1617.51 341.699 1617.51 310.535C1617.51 279.371 1592.25 254.109 1561.08 254.109ZM1774.25 254.109C1743.08 254.109 1717.82 279.371 1717.82 310.535C1717.82 341.699 1743.08 366.961 1774.25 366.961C1805.41 366.961 1830.67 341.699 1830.67 310.535C1830.67 279.371 1805.41 254.109 1774.25 254.109ZM2200.57 -197.297C2169.41 -197.297 2144.15 -172.035 2144.15 -140.871C2144.15 -84.4453 2200.57 -84.4453 2231.74 -84.4453C2257 -109.707 2257 -140.871 2257 -172.035 2231.74 -197.297 2200.57 -197.297ZM2200.57 254.109C2169.41 254.109 2144.15 279.371 2144.15 310.535C2144.15 341.699 2169.41 366.961 2200.57 366.961C2231.74 366.961 2257 341.699 2257 310.535C2257 279.371 2231.74 254.109 2200.57 254.109ZM2200.57 28.4062C2169.41 28.4062 2144.15 53.6683 2144.15 84.832C2144.15 115.996 2169.41 141.258 2200.57 141.258C2231.74 141.258 2257 115.996 2257 84.832C2257 53.6683 2231.74 28.4062 2200.57 28.4062ZM2093.99 366.961C2062.83 366.961 2037.57 392.223 2037.57 423.387C2037.57 454.55 2062.83 479.812 2093.99 479.812C2125.16 479.812 2150.42 454.55 2150.42 423.387C2150.42 392.223 2125.16 366.961 2093.99 366.961ZM1880.83 366.961C1849.66 366.961 1824.4 392.223 1824.4 423.387C1824.4 454.55 1849.66 479.812 1880.83 479.812C1911.99 479.812 1937.25 454.55 1937.25 423.387C1937.25 392.223 1911.99 366.961 1880.83 366.961ZM1987.41 254.109C1956.25 254.109 1930.98 279.371 1930.98 310.535C1930.98 341.699 1956.25 366.961 1987.41 366.961C2018.57 366.961 2043.84 341.699 2043.84 310.535C2043.84 279.371 2018.57 254.109 1987.41 254.109ZM1028.17 366.961C997.008 366.961 971.746 392.223 971.746 423.387C971.746 454.55 997.008 479.812 1028.17 479.812C1059.34 479.812 1084.6 454.55 1084.6 423.387C1084.6 392.223 1059.34 366.961 1028.17 366.961ZM1241.34 -197.297C1272.5 -197.297 1297.76 -222.559 1297.76 -253.723C1297.76 -284.886 1272.5 -310.148 1241.34 -310.148C1210.17 -310.148 1184.91 -284.886 1184.91 -253.723C1184.91 -222.559 1210.17 -197.297 1241.34 -197.297ZM1134.75 -310.148C1165.92 -310.148 1191.18 -335.41 1191.18 -366.574C1191.18 -397.738 1165.92 -423 1134.75 -423C1103.59 -423 1078.33 -397.738 1078.33 -366.574C1078.33 -335.41 1103.59 -310.148 1134.75 -310.148ZM1347.92 -310.148C1379.08 -310.148 1404.34 -335.41 1404.34 -366.574C1404.34 -397.738 1379.08 -423 1347.92 -423C1316.75 -423 1291.49 -397.738 1291.49 -366.574C1291.49 -335.41 1316.75 -310.148 1347.92 -310.148ZM1454.5 -197.297C1485.66 -197.297 1510.93 -222.559 1510.93 -253.723C1510.93 -284.886 1485.66 -310.148 1454.5 -310.148C1423.34 -310.148 1398.07 -284.886 1398.07 -253.723C1398.07 -222.559 1423.34 -197.297 1454.5 -197.297ZM815.008 366.961C783.844 366.961 758.582 392.223 758.582 423.387C758.582 454.55 783.844 479.812 815.008 479.812C846.172 479.812 871.434 454.55 871.434 423.387C871.434 392.223 846.172 366.961 815.008 366.961ZM1561.08 -310.148C1592.25 -310.148 1617.51 -335.41 1617.51 -366.574C1617.51 -397.738 1592.25 -423 1561.08 -423C1529.92 -423 1504.66 -397.738 1504.66 -366.574C1504.66 -335.41 1529.92 -310.148 1561.08 -310.148ZM1028.17 -197.297C1059.34 -197.297 1084.6 -222.559 1084.6 -253.723C1084.6 -284.886 1059.34 -310.148 1028.17 -310.148C997.008 -310.148 971.746 -284.886 971.746 -253.723C971.746 -222.559 997.008 -197.297 1028.17 -197.297ZM1667.66 -197.297C1698.83 -197.297 1724.09 -222.559 1724.09 -253.723C1724.09 -284.886 1698.83 -310.148 1667.66 -310.148C1636.5 -310.148 1611.24 -284.886 1611.24 -253.723C1611.24 -222.559 1636.5 -197.297 1667.66 -197.297ZM708.426 141.258C739.59 141.258 764.852 115.996 764.852 84.832C764.852 53.6683 739.59 28.4062 708.426 28.4062C677.262 28.4062 652 53.6683 652 84.832C652 115.996 677.262 141.258 708.426 141.258ZM921.59 -310.148C952.754 -310.148 978.016 -335.41 978.016 -366.574C978.016 -397.738 952.754 -423 921.59 -423C890.426 -423 865.164 -397.738 865.164 -366.574C865.164 -335.41 890.426 -310.148 921.59 -310.148ZM708.426 -84.4453C739.59 -84.4453 764.852 -109.707 764.852 -140.871C764.852 -172.035 739.59 -197.297 708.426 -197.297C677.262 -197.297 652 -172.035 652 -140.871C652 -109.707 677.262 -84.4453 708.426 -84.4453ZM708.426 254.109C677.262 254.109 652 279.371 652 310.535C652 341.699 677.262 366.961 708.426 366.961C739.59 366.961 764.852 341.699 764.852 310.535C764.852 279.371 739.59 254.109 708.426 254.109ZM708.426 -310.148C739.59 -310.148 764.852 -335.41 764.852 -366.574C764.852 -397.738 739.59 -423 708.426 -423C677.262 -423 652 -397.738 652 -366.574C652 -335.41 677.262 -310.148 708.426 -310.148ZM815.008 -197.297C846.172 -197.297 871.434 -222.559 871.434 -253.723C871.434 -284.886 846.172 -310.148 815.008 -310.148C783.844 -310.148 758.582 -284.886 758.582 -253.723C758.582 -222.559 783.844 -197.297 815.008 -197.297Z" fill="#F0F0EB"/>
+            </g>
+            <path d="M156.42 1958.5C189.261 1914.02 222.101 1869.54 245.372 1841.41C268.643 1813.29 281.348 1802.88 324.898 1775.24C368.448 1747.6 442.457 1703.05 504.039 1670.24C565.621 1637.43 612.533 1617.71 677.136 1599.32C741.739 1580.94 822.611 1564.49 951.04 1554.13C1079.47 1543.77 1253.01 1540 1336.3 1544.75C1419.6 1549.5 1407.4 1562.89 1395.95 1573.43C1375.22 1592.52 1342.96 1610.38 1306.9 1629.96C1282.16 1643.39 1266.35 1649.23 1206.72 1669.35C1152.42 1687.68 1047.77 1717.77 989.109 1734.83C930.448 1751.89 920.555 1753.81 913.996 1753.92C907.436 1754.04 904.509 1752.29 902.19 1749.77C892.811 1739.59 893.489 1724.93 893.624 1708.31C893.901 1674.27 934.312 1656.55 1001.57 1613.34C1010.81 1607.39 953.006 1604.93 865.492 1612.47C827.751 1615.72 804.417 1625.54 780.825 1637.7C732.414 1662.65 696.939 1694.73 673.608 1715.71C663.866 1724.47 659.053 1730.13 656.981 1730.65C652.888 1731.69 665.114 1698.46 680.476 1646.32C698.441 1585.35 699.553 1543 698.388 1530.1C697.817 1523.77 694.894 1518.21 691.309 1514.39C674.646 1496.62 643.12 1507.83 591.215 1525.56C544.036 1541.66 455.427 1574.75 395.332 1594.84C307.382 1624.24 270.368 1631.93 262.878 1631.3C247.069 1629.99 294.258 1587.13 351.043 1549.69C384.836 1527.41 433.943 1506.92 456.447 1494.27C478.951 1481.62 474.696 1479.58 269.258 1477.88C63.82 1476.18 -342.671 1474.88 -557.458 1475.01C-772.245 1475.14 -783.009 1476.74 -792 1484.69" stroke="#F0F0EB" stroke-width="3.32873" stroke-linecap="round"/>
+            <path d="M-328 33.2951C-247.454 -35.7423 -166.907 -104.78 -112.642 -148.645C-58.3763 -192.51 -32.8327 -209.112 -44.0809 -177.962C-55.329 -146.812 -104.143 -67.4073 -126.984 -25.1486C-149.825 17.11 -145.213 19.8167 -94.0647 2.48162C-42.9161 -14.8535 54.6297 -52.3125 108.887 -74.8293C163.144 -97.3461 171.157 -103.786 172.211 -106.572C174.16 -111.726 116.979 -93.5109 88.9611 -71.317C74.8357 -60.1278 181.454 -59.9217 229.266 -59.5187C277.077 -59.1158 293.668 -61.2918 303.672 -62.7895C313.676 -64.2873 316.591 -65.041 277.656 -52.2919C238.721 -39.5428 157.849 -13.268 112.96 2.48586C60.9385 20.7426 52.4592 30.1458 50.0298 34.8584C48.3033 38.2074 86.5333 29.0997 141.845 11.5483C184.4 -1.95526 214.918 -19.4735 234.73 -27.2293C240.342 -29.4261 237.166 -27.438 196.069 -19.2619C154.972 -11.0857 76.1092 3.38552 31.0273 12.422C-14.0547 21.4584 -22.9658 24.6216 -24.0934 26.9269C-25.221 29.2322 -18.2951 30.5838 15.7074 27.9648C49.71 25.3458 110.579 18.7152 154.077 12.1646C222.264 1.89591 251.325 -9.87523 256.815 -12.6078C257.751 -13.074 255.348 -9.68288 249.733 -5.7328C244.118 -1.78271 235.471 3.13185 285.202 0.214761C334.932 -2.70233 443.302 -13.6 519.96 -24.4983C596.618 -35.3965 638.28 -45.9651 651.364 -51.8094C664.448 -57.6536 647.692 -58.4533 614.693 -53.5738C581.694 -48.6944 532.958 -38.1116 494.83 -26.9032C429.582 -7.72224 397.516 11.4135 404.092 16.4607C414.482 24.4344 449.249 16.5579 478.014 14.0486C506.779 11.5393 531.061 7.77462 555.63 1.94323C604.792 -9.72523 638.072 -25.2117 652.484 -34.7742C658.172 -38.5479 659.847 -41.216 648.641 -38.5792C637.435 -35.9425 613.115 -28.1973 558.613 -13.8776C504.111 0.442059 420.163 21.1016 367.77 35.1146C315.376 49.1275 297.081 55.8678 278.035 66.6978C258.99 77.5277 239.748 92.2431 230.427 104.041C221.106 115.839 222.289 124.275 236.227 137.101C250.165 149.927 276.823 166.89 389.242 195.979C501.661 225.069 699.032 265.773 835.037 289.022C971.041 312.27 1039.7 316.831 1085.67 316.872C1131.64 316.913 1152.85 312.295 1160.02 307.373C1168.1 301.821 1126.08 283.568 1043.51 265.859C987.285 253.799 899.904 247.198 857.37 241.828C817.374 236.779 787.263 208.197 749.207 170.396C741.768 163.007 738.908 157.905 699.561 175.896C660.215 193.886 584.928 234.66 541.286 259.423C487.087 290.175 475.412 302.019 473.233 305.922C472.571 307.107 476.783 307.249 503.577 300.517C530.372 293.786 580.636 280.323 630.975 269.879C681.313 259.436 730.203 252.42 780.832 248.108C831.462 243.797 882.35 242.403 895.286 252.58C922.199 273.755 853.882 310.331 865.376 319.495C877.287 325.328 901.542 333.565 926.189 340.77C950.837 347.975 975.143 353.898 1000.19 360" stroke="#F0F0EB" stroke-width="3.32873" stroke-linecap="round"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_54_866"><rect width="1080" height="1920" fill="white"/></clipPath>
+            <clipPath id="clip1_54_866"><rect width="1605" height="902.812" fill="white" transform="translate(652 -423)"/></clipPath>
+          </defs>
+        </svg>
+      </div>
+
+      <!-- 1. Tiêu đề hiển thị tuổi thật nhỏ gọn, tinh tế -->
+      <div class="anim-fade-up delay-1" style="position: absolute; top: 180px; left: 0; right: 0; text-align: center; z-index: 10;">
+        <h2 style="font-size: 21px; font-weight: 800; color: #FFFFFF; line-height: 1.2; letter-spacing: -0.02em;">
+          My real age: <span id="val-user-age" style="color: #CEF832;">24</span>
+        </h2>
+        <p style="font-size: 13.5px; color: #A3A3A3; font-weight: 700; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.08em;">
+          But my scalp age is..
+        </p>
+      </div>
+
+      <!-- 2. Số tuổi chân tóc lớn to đùng (Hair Stress Age) -->
+      <div class="anim-pop delay-2" style="position: absolute; top: 250px; left: 0; right: 0; text-align: center; z-index: 10;">
+        <div id="val-stress-age" class="big-number-wrapped" style="font-size: 172px; -webkit-text-stroke: 4.5px #FFFFFF;">
+          26
+        </div>
+      </div>
+
+      <!-- 3. Giữ nguyên câu chữ gốc chuẩn Wrapped -->
+      <div class="anim-fade-up delay-3" style="position: absolute; top: 422px; left: 0; right: 0; text-align: center; z-index: 10;">
+        <p style="font-size: 15px; color: #D8D7D0; font-weight: 600;">
+          At the moment I take the test
+        </p>
+        <p id="val-date" style="font-size: 16px; color: #ffffff; font-weight: 800; margin-top: 2px;">
+          (23/09/2026)
+        </p>
+      </div>
+
+      <!-- Footer Slide 1 -->
+      <div style="position: absolute; bottom: 12px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; z-index: 20;">
+        <svg style="width: 32px; height: 32px;" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="17.5" stroke="#F0F0EB" stroke-width="2.5" />
+          <path d="M13 13 L27 27 M27 13 L13 27" stroke="#F0F0EB" stroke-width="3" stroke-linecap="square" />
+        </svg>
+        <div style="font-weight: 800; font-size: 10.5px; line-height: 1; text-transform: uppercase; letter-spacing: 0.16em; color: #F0F0EB;">
+          xmen.mck.com/wrapped
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 2 ================= -->
+    <div class="story-slide" id="slide-1">
+      <div style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+        <svg style="width: 100%; height: 100%;" viewBox="0 0 1080 1920" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_24_186)">
+            <rect width="1080" height="1920" fill="#292929"/>
+            <path d="M264.503 832.549C322.112 807.02 379.721 781.49 482.937 755.773C586.153 730.056 733.231 704.925 805.267 696.622C877.303 688.318 869.839 697.603 709.992 755.701C550.145 813.8 238.141 920.43 69.3199 981.306C-99.5011 1042.18 -115.684 1054.07 -120.11 1060.19C-124.535 1066.32 -116.713 1066.32 3.90149 1030.7C124.516 995.075 357.685 923.831 497.54 878.856C637.395 833.882 676.87 817.335 702.583 805.351C728.295 793.367 739.048 786.446 737.7 789.717C736.351 792.988 722.575 806.66 641.598 861.871C560.622 917.081 412.863 1013.42 331.209 1067.62C249.556 1121.82 238.485 1130.96 232.501 1137.76C226.517 1144.56 225.956 1148.74 242.993 1149.89C260.03 1151.04 294.683 1149.05 434.349 1113.47C574.014 1077.89 817.642 1008.8 969.129 960.235C1120.62 911.675 1172.58 885.746 1130.74 880.847C1088.89 875.947 951.665 892.861 849.195 910.274C746.726 927.687 683.172 945.086 636.738 961.628C590.305 978.169 562.917 993.328 627.619 998.845C692.32 1004.36 849.939 999.78 916.422 1006.24C982.905 1012.7 953.475 1030.33 776.765 1082.68C600.054 1135.03 276.956 1221.55 113.286 1266.32C-50.3838 1311.1 -44.8346 1311.5 154.744 1273.37C354.322 1235.24 747.761 1158.57 1015.32 1097.33C1282.87 1036.09 1412.62 992.599 1512.6 954.255C1612.57 915.912 1678.84 884.03 1727.02 857.285C1803.28 809.899 1834.17 783.074 1838.26 772.835C1840.4 768.155 1842.67 764.522 1845 759.542" stroke="#F0F0EB" stroke-width="3" stroke-linecap="round"/>
+            <rect x="186.348" y="-426.152" width="707.304" height="707.304" rx="353.652" fill="#292929" stroke="#CFB23C" stroke-width="5.6964"/>
+            <rect x="186.348" y="-164.117" width="707.304" height="707.304" rx="353.652" fill="#292929" stroke="#CFB23C" stroke-width="5.6964"/>
+            <rect x="186.348" y="-43.5424" width="707.304" height="707.304" rx="353.652" fill="#292929" stroke="#CFB23C" stroke-width="5.6964"/>
+            <rect x="186.348" y="77.0318" width="707.304" height="707.304" rx="353.652" fill="#292929" stroke="#CFB23C" stroke-width="5.6964"/>
+            <rect x="186.348" y="197.606" width="707.304" height="707.304" rx="353.652" fill="#292929" stroke="#CFB23C" stroke-width="5.6964"/>
+          </g>
+          <defs><clipPath id="clip0_24_186"><rect width="1080" height="1920" fill="white"/></clipPath></defs>
+        </svg>
+      </div>
+
+      <!-- Khối ảnh tròn nghệ sĩ -->
+      <div id="box-artist" class="anim-pop delay-1" style="
+        position: absolute;
+        top: 90px;
+        left: 65px;        
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: #1c1c1c;
+        border: 3.5px solid #CFB23C;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(207, 178, 60, 0.25);
+        z-index: 5;
+      ">
+        <img id="val-artist-img" 
+             src="" 
+             alt="Artist Portrait" 
+             style="width: 100%; height: 100%; object-fit: cover; display: block;">
+      </div>
+
+      <!-- Khối hồ sơ da đầu -->
+      <div id="box-profile" class="anim-fade-up delay-2" style="
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        top: 356px;
+        height: 102px;
+        background: #292929;
+        border: 2px solid #CFB23C;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+        z-index: 10;
+      ">
+        <span style="font-size: 11px; font-weight: 800; color: #F0F0EB; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 5px;">
+          Hồ sơ da đầu
+        </span>
+        <h2 id="val-scalp-title" class="archivo-font" style="font-size: 22px; color: #FFFFFF; letter-spacing: -0.02em; text-transform: uppercase; line-height: 1.1;">
+          Oil-Prone & Gàu
+        </h2>
+      </div>
+
+      <!-- Khối áp lực môi trường -->
+      <div id="box-exposure" class="anim-fade-up delay-3" style="
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        top: 481px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 10;
+      ">
+        <span style="font-size: 11px; font-weight: 700; color: #a3a3a3; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;">
+          Áp lực môi trường
+        </span>
+        <div id="val-exposure-level" class="archivo-font" style="font-size: 38px; color: #FF0055; line-height: 1; letter-spacing: -0.03em; margin: 4px 0 10px 0;">
+          HIGH
+        </div>
+        <p id="val-exposure-desc" style="font-size: 11.5px; font-weight: 600; color: #D0CFC9; line-height: 1.45; max-width: 290px;">
+          Đội mũ bảo hiểm thường xuyên kết hợp cùng thời tiết khói bụi khiến da đầu luôn trong tình trạng bết dầu và rụng tóc âm ỉ.
+        </p>
+      </div>
+
+      <div style="position: absolute; bottom: 12px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; z-index: 20;">
+        <svg style="width: 32px; height: 32px;" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="17.5" stroke="#F0F0EB" stroke-width="2.5" />
+          <path d="M13 13 L27 27 M27 13 L13 27" stroke="#F0F0EB" stroke-width="3" stroke-linecap="square" />
+        </svg>
+        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 10.5px; line-height: 1; text-transform: uppercase; letter-spacing: 0.16em; color: #F0F0EB;">
+          xmen.mck.com/wrapped
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 3 ================= -->
+    <div class="story-slide" id="slide-2">
+      <div style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+        <svg style="width: 100%; height: 100%;" viewBox="0 0 1080 1920" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip1_stripes_native)">
+            <path d="M819.357 1211.07H753V1659.15H819.357V1211.07Z" fill="#F0F0EB"/>
+            <path d="M885.714 763H819.357L819.357 1211.07H885.714V763Z" fill="#F0F0EB"/>
+            <path d="M952.083 1211.07H885.726V1659.15H952.083V1211.07Z" fill="#F0F0EB"/>
+            <path d="M1018.44 763H952.083V1211.07H1018.44V763Z" fill="#F0F0EB"/>
+            <path d="M1084.8 1211.07H1018.44V1659.15H1084.8V1211.07Z" fill="#F0F0EB"/>
+            <path d="M1151.17 763H1084.81V1211.07H1151.17V763Z" fill="#F0F0EB"/>
+            <path d="M1217.52 1211.07H1151.17V1659.15H1217.52V1211.07Z" fill="#F0F0EB"/>
+            <path d="M885.714 1659.97H819.357V2108.04H885.714V1659.97Z" fill="#F0F0EB"/>
+            <path d="M1018.44 1659.97H952.083V2108.04H1018.44V1659.97Z" fill="#F0F0EB"/>
+            <path d="M1151.17 1659.97H1084.81V2108.04H1151.17V1659.97Z" fill="#F0F0EB"/>
+          </g>
+          <defs>
+            <clipPath id="clip1_stripes_native">
+              <rect width="2494" height="1003" fill="white" transform="translate(753 763)"/>
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="anim-fade-up delay-1" style="position: absolute; top: 81px; left: 0; right: 0; text-align: center; z-index: 10;">
+        <h3 style="font-weight: 800; font-size: 18px; line-height: 1.2; letter-spacing: -0.04em;">You’re in great<br>company.</h3>
+        <div id="val-survival-rate" class="archivo-font" style="font-size: 115px; color: #CEF832; -webkit-text-stroke: 3.5px #FFFFFF; line-height: 0.82; margin: 6px 0;">9%</div>
+        <p style="color: #D0CFC9; font-size: 11px; font-weight: 600;">of brothers are in your scalp survival club.</p>
+      </div>
+
+      <div class="anim-fade-up delay-2" style="position: absolute; top: 290px; left: 24px; z-index: 10;">
+        <h4 style="font-weight: 800; font-size: 15px; margin-bottom: 12px;">Your type</h4>
+        <div id="cards-grid" style="display: grid; grid-template-columns: repeat(2, 82px); column-gap: 20px; row-gap: 34px;"></div>
+      </div>
+
+      <div style="position: absolute; bottom: 12px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; z-index: 20;">
+        <svg style="width: 32px; height: 32px;" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17.5" stroke="#F0F0EB" stroke-width="2.5"/><path d="M13 13 L27 27 M27 13 L13 27" stroke="#F0F0EB" stroke-width="3"/></svg>
+        <div style="font-weight: 800; font-size: 10.5px; letter-spacing: 0.16em; color: #F0F0EB;">XMEN.MCK.COM/WRAPPED</div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 4 ================= -->
+    <div class="story-slide" id="slide-3" style="background: #F0F0EB; color: #292929;">
+      <div style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+        <svg style="width: 100%; height: 100%;" viewBox="0 0 1080 1920" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <rect width="1080" height="1920" fill="#F0F0EB"/>
+          <g fill="#292929">
+            <path d="M644.172 468.588C644.172 708.719 839.711 904.05 1080.06 904.05V848.313C870.509 848.313 699.983 677.964 699.983 468.617C699.983 259.27 870.509 88.9213 1080.06 88.9213V33.125C839.696 33.125 644.172 228.501 644.172 468.588Z"/>
+            <path d="M568.04 0H497.681C398.269 126.037 338.891 284.975 338.891 457.485C338.891 629.995 398.269 788.948 497.681 914.97H568.04C454.968 789.007 393.118 628.012 393.118 457.485C393.118 286.959 454.968 125.978 568.04 0Z"/>
+            <path d="M596.899 468.585C596.899 242.381 753.498 52.0519 964.044 0H821.342C656.277 91.3017 544.27 267.127 544.27 468.585C544.27 654.77 639.908 819.021 784.726 914.97H896.275C720.746 842.583 596.899 669.792 596.899 468.585Z"/>
+            <path d="M837.298 468.584C837.298 602.333 946.212 711.158 1080.11 711.158V657.759C975.723 657.759 890.756 572.881 890.756 468.584C890.756 364.288 975.723 279.41 1080.11 279.41V226.07C946.212 226.07 837.298 334.866 837.298 468.614V468.584Z"/>
+            <path d="M938.027 468.585C938.027 546.848 1001.74 610.503 1080.08 610.503V569.862C1024.21 569.862 978.728 524.441 978.728 468.615C978.728 412.789 1024.21 367.368 1080.08 367.368V326.727C1001.74 326.697 938.027 390.352 938.027 468.615V468.585Z"/>
+            <path d="M496.999 468.585C496.999 312.992 557.65 166.693 667.777 56.6695C688.482 36.0382 710.446 17.1089 733.504 0H633.944C514.641 116.151 440.389 278.315 440.389 457.485C440.389 636.67 514.611 798.819 633.944 914.97H705.443C692.493 904.078 679.913 892.607 667.777 880.501C557.65 770.448 496.999 624.178 496.999 468.556V468.585Z"/>
+            <path d="M747.285 468.583C747.285 651.912 896.559 801.067 1080.08 801.067V758.383C920.135 758.383 790.013 628.379 790.013 468.583C790.013 308.787 920.135 178.783 1080.08 178.783V136.129C896.559 136.129 747.285 285.254 747.285 468.583Z"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="anim-pop delay-1" style="position: absolute; left: 14px; top: 38px; width: 85px; z-index: 5;">
+        <div class="archivo-font" style="font-size: 78px; line-height: 0.88; color: #E55541; -webkit-text-stroke: 1.5px #292929;">2<br>0<br>2<br>6</div>
+      </div>
+
+      <div class="anim-pop delay-1" style="position: absolute; right: 20px; top: 38px; width: 242px; height: 242px; border: 3px solid #292929; background: #000; overflow: hidden; z-index: 10; box-shadow: 4px 6px 0px #292929;">
+        <img id="track-cover" src="" alt="Cover" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.88) 0%, transparent 100%); padding: 8px 10px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="min-width: 0; max-width: 170px;">
+            <div id="track-title" style="font-size: 10px; font-weight: 800; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Track Title</div>
+            <div id="track-artist" style="font-size: 8.5px; font-weight: 600; color: #A3A3A3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Artist</div>
+          </div>
+          <div style="display: flex; gap: 2.5px; align-items: flex-end; height: 14px;">
+            <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="anim-fade-up delay-2" style="position: absolute; left: 24px; right: 24px; top: 343px; display: flex; gap: 16px; z-index: 10;">
+        <div style="flex: 1;">
+          <h4 style="font-size: 11px; font-weight: 800; text-transform: uppercase; border-bottom: 1.5px solid #292929; padding-bottom: 3px; margin-bottom: 8px;">Thói quen</h4>
+          <ul id="list-habits" style="list-style: none; font-size: 11px; font-weight: 700; line-height: 1.45;"></ul>
+        </div>
+        <div style="flex: 1;">
+          <h4 style="font-size: 11px; font-weight: 800; text-transform: uppercase; border-bottom: 1.5px solid #292929; padding-bottom: 3px; margin-bottom: 8px;">Tác động</h4>
+          <ul id="list-impacts" style="list-style: none; font-size: 11px; font-weight: 700; line-height: 1.45;"></ul>
+        </div>
+      </div>
+
+      <div class="anim-fade-up delay-3" style="position: absolute; left: 24px; right: 24px; top: 488px; z-index: 10;">
+        <div style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: #737373;">The Grooming Gap</div>
+        <div class="archivo-font" style="font-size: 42px; color: #292929; margin: 2px 0 6px 0; line-height: 1.05;">
+          <span id="val-gap-stat">65%</span>
+        </div>
+        <p id="val-gap-desc" style="font-size: 10.5px; font-weight: 600; color: #525252; line-height: 1.4;">Khoảng cách giữa tiêu chuẩn lý tưởng và hành vi tiện tay.</p>
+      </div>
+
+      <div style="position: absolute; bottom: 12px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; z-index: 20;">
+        <svg style="width: 32px; height: 32px;" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17.5" stroke="#292929" stroke-width="2.5"/><path d="M13 13 L27 27 M27 13 L13 27" stroke="#292929" stroke-width="3"/></svg>
+        <div style="font-weight: 800; font-size: 10.5px; letter-spacing: 0.16em; color: #292929;">XMEN.MCK.COM/WRAPPED</div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 5 (KẾT QUẢ CUỐI & NÚT NHẬN QUÀ) ================= -->
+    <div class="story-slide" id="slide-4">
+      <div id="finalCardToShare" style="position: absolute; width: 1080px; height: 1920px; transform: scale(0.3518); transform-origin: top left;">
+        
+        <svg width="1080" height="1920" viewBox="0 0 1080 1920" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_20_58)">
+            <rect width="1080" height="1920" fill="#292929" style="fill:#292929;fill:color(display-p3 0.1608 0.1608 0.1608);fill-opacity:1;"/>
+            <mask id="mask0_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="917" y="915" width="327" height="653">
+              <path d="M917.237 915.262H1244V1567.62H917.237V915.262Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask0_20_58)">
+              <path d="M919.08 1242.27C919.08 1421.25 1064.83 1566.84 1243.98 1566.84V1525.3C1087.78 1525.3 960.68 1398.33 960.68 1242.29C960.68 1086.25 1087.78 959.276 1243.98 959.276V917.688C1064.82 917.688 919.08 1063.31 919.08 1242.27Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask1_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="691" y="893" width="173" height="683">
+              <path d="M691.312 893H863.58V1575.01H691.312V893Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask1_20_58)">
+              <path d="M862.334 893H809.891C735.792 986.944 691.534 1105.41 691.534 1233.99C691.534 1362.58 735.792 1481.05 809.891 1574.99H862.334C778.054 1481.1 731.953 1361.1 731.953 1233.99C731.953 1106.89 778.054 986.9 862.334 893Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask2_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="843" y="893" width="318" height="683">
+              <path d="M843.811 893H1160.1V1575.01H843.811V893Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask2_20_58)">
+              <path d="M883.844 1242.27C883.844 1073.66 1000.57 931.798 1157.5 893H1051.14C928.102 961.053 844.616 1092.11 844.616 1242.27C844.616 1381.04 915.901 1503.47 1023.84 1574.99H1106.99C976.155 1521.03 883.844 1392.24 883.844 1242.27Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask3_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="1061" y="1059" width="183" height="365">
+              <path d="M1061.26 1059.29H1244V1423.59H1061.26V1059.29Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask3_20_58)">
+              <path d="M1063.03 1242.27C1063.03 1341.96 1144.21 1423.07 1244.01 1423.07V1383.27C1166.21 1383.27 1102.87 1320.01 1102.87 1242.27C1102.87 1164.53 1166.21 1101.27 1244.01 1101.27V1061.51C1144.21 1061.51 1063.03 1142.6 1063.03 1242.29V1242.27Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask4_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="764" y="893" width="224" height="683">
+              <path d="M764.737 893H987.837V1575.01H764.737V893Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask4_20_58)">
+              <path d="M809.383 1242.27C809.383 1126.29 854.59 1017.25 936.675 935.239C952.108 919.862 968.478 905.752 985.665 893H911.457C822.532 979.575 767.188 1100.45 767.188 1233.99C767.188 1367.55 822.51 1488.41 911.457 1574.99H964.75C955.097 1566.87 945.72 1558.32 936.675 1549.29C854.59 1467.26 809.383 1358.24 809.383 1242.24V1242.27Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask5_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="993" y="994" width="251" height="498">
+              <path d="M993.487 994.336H1244V1491.37H993.487V994.336Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask5_20_58)">
+              <path d="M995.937 1242.27C995.937 1378.91 1107.2 1490.09 1243.99 1490.09V1458.27C1124.77 1458.27 1027.78 1361.37 1027.78 1242.27C1027.78 1123.16 1124.77 1026.26 1243.99 1026.26V994.469C1107.2 994.469 995.937 1105.62 995.937 1242.27Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask6_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="670" y="893" width="8" height="11">
+              <path d="M670 893H677.193V903.965H670V893Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask6_20_58)">
+              <path d="M676.421 893H670.012V903.877C672.119 900.237 674.237 896.596 676.421 893Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask7_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="670" y="1561" width="8" height="15">
+              <path d="M670 1561.97H677.193V1575.01H670V1561.97Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask7_20_58)">
+              <path d="M676.421 1575.01C674.237 1571.39 672.119 1567.77 670.012 1564.12V1574.99H676.421V1575.01Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask8_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="670" y="1358" width="98" height="218">
+              <path d="M670 1358.64H767.562V1575.01H670V1358.64Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask8_20_58)">
+              <path d="M670.022 1485.83C683.768 1516.95 699.962 1546.77 718.362 1574.99H765.478C719.278 1510.63 686.989 1438.05 670.045 1360.98V1485.83H670.022Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <mask id="mask9_20_58" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="670" y="893" width="98" height="215">
+              <path d="M670 893H767.562V1107.3H670V893Z" fill="white" style="fill:white;fill-opacity:1;"/>
+            </mask>
+            <g mask="url(#mask9_20_58)">
+              <path d="M765.456 893H718.34C699.94 921.241 683.746 951.047 670.012 982.156V1107.02C686.945 1029.97 719.256 957.391 765.456 893Z" fill="#BEE860" style="fill:#BEE860;fill:color(display-p3 0.7451 0.9098 0.3765);fill-opacity:1;"/>
+            </g>
+            <path d="M-48 1762.76C-45.2394 1762.21 -42.4788 1761.66 -34.8206 1759.12C-27.1625 1756.58 -14.6906 1752.06 157.204 1723.14C329.098 1694.22 660.037 1641.04 846.951 1609.14C1033.87 1577.23 1066.73 1568.21 968.379 1595.28C870.031 1622.35 639.478 1685.78 503.323 1726.07C367.169 1766.35 332.399 1781.58 305.298 1794.64C278.197 1807.7 259.819 1818.14 421.364 1774.98C582.91 1731.82 924.936 1634.75 1106.73 1582.52C1288.53 1530.29 1299.73 1525.85 1208.33 1550.39C1116.93 1574.94 922.583 1628.6 806.796 1664.28C691.01 1699.97 659.673 1716.05 705.336 1715.64C750.999 1715.23 874.613 1697.84 966.478 1681.21C1058.34 1664.58 1114.72 1649.24 1149.32 1638.35C1183.92 1627.46 1195.04 1621.49 1206.49 1615.34" stroke="#F0F0EB" style="stroke:#F0F0EB;stroke:color(display-p3 0.9412 0.9412 0.9216);stroke-opacity:1;" stroke-width="5" stroke-linecap="round"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_20_58">
+              <rect width="1080" height="1920" fill="white" style="fill:white;fill-opacity:1;"/>
+            </clipPath>
+          </defs>
+        </svg>
+
+        <!-- 1. G-IQ -->
+        <div style="position: absolute; width: 240px; height: 74px; left: 779px; top: 109px; background: #F0F0EB; box-shadow: 37px -31px 4px rgba(0, 0, 0, 0.36); display: flex; align-items: center; justify-content: center;">
+          <span id="val-giq" style="font-family: 'Anek Bangla', sans-serif; font-weight: 700; font-size: 60px; line-height: 1; letter-spacing: 0.05em; color: #292929; transform: rotate(0.14deg); white-space: nowrap;">G-IQ 47</span>
+        </div>
+
+        <!-- 2. Bản Lĩnh -->
+        <div style="position: absolute; width: 440px; height: 74px; left: 580px; top: 246px; background: #F0F0EB; box-shadow: 37px -31px 4px rgba(0, 0, 0, 0.36); display: flex; align-items: center; justify-content: center;">
+          <span id="val-courage" style="font-family: 'Anek Bangla', sans-serif; font-weight: 700; font-size: 58px; line-height: 1; letter-spacing: 0.02em; color: #292929; transform: rotate(0.14deg); white-space: nowrap;">Bản Lĩnh 43%</span>
+        </div>
+
+        <!-- 3. You're -->
+        <div style="position: absolute; left: 70px; top: 383px; font-family: 'Andada Pro', serif; font-size: 60px; line-height: 1; text-decoration: underline; text-underline-offset: 14px; text-decoration-thickness: 3px; color: #F0F0EB;">
+          You're
+        </div>
+
+        <!-- 4. Archetype Banner -->
+        <div style="position: absolute; width: 830px; height: 136px; left: 70px; top: 479px; display: flex; align-items: center; justify-content: center; background: #F0F0EB; padding: 0 16px;">
+          <span id="val-archetype" style="font-family: 'Anek Bangla', sans-serif; font-weight: 800; font-size: 68px; line-height: 1; letter-spacing: -0.04em; color: #292929; transform: rotate(0.14deg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            THE COVER-UP MAN!
+          </span>
+        </div>
+
+        <!-- 5. Slogan phụ -->
+        <div style="position: absolute; width: 450px; left: calc(50% - 326px/2 + 73px); top: 656px; text-align: right;">
+          <span id="val-slogan" style="font-family: 'Andada Pro', serif; font-style: italic; font-weight: 600; font-size: 40px; color: #F0F0EB; opacity: 0.66;">
+            Thơm trước. Tính sau
+          </span>
+        </div>
+
+        <!-- 6. Quote -->
+        <div style="position: absolute; left: 70px; top: 751px; width: 558px; background: #292929; border-left: 2px solid #B3EA42; padding: 24px 20px 24px 10px;">
+          <span id="val-quote" style="font-family: 'Be Vietnam Pro', sans-serif; font-size: 38px; line-height: 48px; color: #F0F0EB; display: block; transform: rotate(0.14deg);">
+            “Hương thơm cứu vãn tình thế, nhưng gốc rễ vấn đề vẫn nằm ở đó.”
+          </span>
+        </div>
+
+        <!-- 7. Điểm mạnh -->
+        <div style="position: absolute; left: 70px; top: 962px; width: 519px; min-height: 144px; background: #303030; box-shadow: 53px 27px 4px rgba(186, 186, 186, 0.25); padding: 22px 26px;">
+          <p style="font-family: 'Be Vietnam Pro', sans-serif; font-size: 34px; line-height: 44px; color: #F0F0EB; margin: 0; transform: rotate(0.14deg);">
+            <strong style="font-weight: 800;">Điểm mạnh:</strong> <span id="val-strength" style="font-weight: 400;">Luôn tự tin nhờ hương thơm cuốn hút.</span>
+          </p>
+        </div>
+
+        <!-- 8. Điểm mù -->
+        <div style="position: absolute; left: 70px; top: 1165px; width: 519px; min-height: 144px; background: #303030; box-shadow: 53px 27px 4px rgba(186, 186, 186, 0.25); padding: 22px 26px;">
+          <p style="font-family: 'Be Vietnam Pro', sans-serif; font-size: 34px; line-height: 44px; color: #F0F0EB; margin: 0; transform: rotate(0.14deg);">
+            <strong style="font-weight: 800;">Điểm mù:</strong> <span id="val-blindspot" style="font-weight: 400;">Che đậy mùi và dầu thừa, chưa sạch từ gốc.</span>
+          </p>
+        </div>
+
+        <!-- 9. Lời khuyên bản lĩnh -->
+        <div style="position: absolute; left: 70px; top: 1380px; width: 558px; min-height: 244px; background: #303030; border: 4px solid #B3EA42; border-radius: 6px; padding: 24px 28px;">
+          <p style="font-family: 'Be Vietnam Pro', sans-serif; font-size: 38px; line-height: 48px; color: #F0F0EB; margin: 0; transform: rotate(0.14deg);">
+            <strong style="font-weight: 900; display: block; margin-bottom: 4px;">Lời khuyên bản lĩnh:</strong> 
+            <span id="val-advice" style="font-weight: 400;">Đừng chỉ che giấu bằng mùi hương, hãy làm sạch sâu nang tóc từ gốc.</span>
+          </p>
+        </div>
+
+      </div>
+
+      <!-- FOOTER XMEN -->
+      <div style="position: absolute; bottom: 12px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; z-index: 20;">
+        <svg style="width: 32px; height: 32px;" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17.5" stroke="#F0F0EB" stroke-width="2.5"/><path d="M13 13 L27 27 M27 13 L13 27" stroke="#F0F0EB" stroke-width="3"/></svg>
+        <div style="font-weight: 800; font-size: 10.5px; letter-spacing: 0.16em; color: #F0F0EB;">XMEN.MCK.COM/WRAPPED</div>
+      </div>
+
+      <!-- LỚP PHỦ MỜ KẾT THÚC: SAVE / NHẬN QUÀ / REPLAY / RETAKE -->
+      <div class="end-modal-overlay" id="endModalOverlay">
+        <div class="end-btn-group">
+          <!-- 1. LƯU THẺ WRAPPED -->
+          <button class="btn-action btn-save" onclick="saveFinalWrapped(event)">
+            <svg style="width: 17px; height: 17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span id="btnSaveText">LƯU THẺ WRAPPED</span>
+          </button>
+
+          <!-- 2. NHẬN QUÀ -->
+          <button class="btn-action btn-gift" onclick="goToDiscount(event)">
+            <svg style="width: 17px; height: 17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+            </svg>
+            <span>NHẬN QUÀ</span>
+          </button>
+          
+          <!-- 3. XEM LẠI STORY -->
+          <button class="btn-action btn-secondary" onclick="replayStory(event)">
+            <svg style="width: 17px; height: 17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            <span>XEM LẠI STORY</span>
+          </button>
+
+          <!-- 4. LÀM LẠI TEST -->
+          <button class="btn-action btn-secondary" onclick="retakeTheTest(event)">
+            <svg style="width: 17px; height: 17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            <span>LÀM LẠI TEST</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= MÀN HÌNH DISCOUNT OVERLAY ================= -->
+    <div id="discountOverlay" style="
+      position: absolute;
+      inset: 0;
+      background: #0c0c0c;
+      z-index: 250;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      pointer-events: none;
+    ">
+      <!-- Thanh tiến trình riêng (10 giây) -->
+      <div style="position: absolute; top: 14px; left: 16px; right: 16px; height: 2.5px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; z-index: 40; overflow: hidden;">
+        <div id="discountProgFill" style="height: 100%; width: 0%; background: #00e5ff; transition: width 0.1s linear;"></div>
+      </div>
+
+      <!-- VÙNG CHẠM BÊN TRÁI (40% màn hình) ĐỂ QUAY VỀ MÀN HÌNH MỜ -->
+      <div onclick="goBackFromDiscount(event)" style="
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 40%;
+        z-index: 260;
+        cursor: pointer;
+      " title="Chạm trái để quay lại"></div>
+
+      <!-- ẢNH DISCOUNT NỀN -->
+      <div class="figma-world" style="
+        position: absolute;
+        width: 1620px;
+        height: 2880px;
+        transform: scale(0.234567);
+        transform-origin: top left;
+        background: url('https://res.cloudinary.com/kjby7u78/image/upload/v1790174773/I%CC%81T_MEN_Ca%CC%82u_chuye%CC%A3%CC%82n_tre%CC%82n_Facebook.pdf_-_Page_1_of_1.png') no-repeat center center;
+        background-size: cover;
+        overflow: hidden;
+        inset: 0;
+        pointer-events: none;
+      ">
+        <!-- VÙNG BẤM NÚT SHOP NOW -->
+        <a href="https://emsicase.com" target="_blank" class="hotspot-shopnow" title="Shop Now" style="
+          position: absolute;
+          left: 820px;
+          top: 1030px;
+          width: 470px;
+          height: 140px;
+          border-radius: 20px;
+          cursor: pointer;
+          z-index: 25;
+          display: block;
+          pointer-events: auto;
+        ">
+          <div class="laser-sweep" style="
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 80%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+            transform: skewX(-25deg);
+            animation: sweepAnim 2.8s infinite;
+          "></div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= SCRIPT ENGINE ================= -->
+  <script>
+    let currentTrack = null;
+    let storyAudio = null;
+    let isReadyToPlay = false;
+    let isFadingOut = false;
+    const FADE_TIME = 2.0;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+
+    // 1. DECK SHUFFLE DỰ PHÒNG CHO CLIENT
+    function drawTrackFromDeck(trackList) {
+      let deck = JSON.parse(localStorage.getItem('xmen_track_deck') || '[]');
+      if (!deck || deck.length === 0 || deck.some(i => i >= trackList.length)) {
+        deck = Array.from({ length: trackList.length }, (_, i) => i);
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+      }
+      const chosenIndex = deck.pop();
+      localStorage.setItem('xmen_track_deck', JSON.stringify(deck));
+      return trackList[chosenIndex];
+    }
+
+    let pollWorkerTimer = null;
+
+    // 2. KHỞI CHẠY TẢI DỮ LIỆU & BẬT POLLING NGẦM ĐÓN CHỮ GEMINI
+    async function initWrappedStory() {
+      const overlayText = document.querySelector('#startOverlay p');
+      const startBtn = document.querySelector('.start-btn');
+
+      overlayText.innerText = "Đang tổng hợp kết quả...";
+      startBtn.style.opacity = "0.5";
+      startBtn.style.pointerEvents = "none";
+
+      try {
+        const promises = [fetch('/api/tracks').then(r => r.json())];
+        if (sessionId) {
+          promises.push(fetch(`/api/quiz/result/${sessionId}`).then(r => r.json()));
+        }
+
+        const results = await Promise.all(promises);
+        const trackList = results[0] || [];
+        const quizData = results[1] || null;
+        
+        const localTrack = JSON.parse(localStorage.getItem('xmen_assigned_track') || 'null');
+
+        if (quizData && quizData.assigned_track) {
+          currentTrack = quizData.assigned_track;
+        } else if (localTrack) {
+          currentTrack = localTrack;
+        } else if (trackList.length > 0) {
+          currentTrack = drawTrackFromDeck(trackList);
+        }
+
+        // Vẽ ngay các chỉ số điểm số đã có sẵn
+        renderDataToSlides(quizData);
+
+        // BẬT POLLING NGẦM: Nếu Gemini chưa xong, cứ 1.5s hỏi server 1 lần cho đến khi có chữ AI!
+        if (sessionId) {
+          startBackgroundResultPolling(sessionId);
+        }
+
+        if (currentTrack && currentTrack.cut_url) {
+          try {
+            const audioRes = await fetch(currentTrack.cut_url);
+            const blob = await audioRes.blob();
+            storyAudio = new Audio(URL.createObjectURL(blob));
+          } catch (e) {
+            storyAudio = new Audio(currentTrack.cut_url);
+          }
+          setupAudioEngine();
+        }
+
+        isReadyToPlay = true;
+        overlayText.innerText = "Chạm để bắt đầu";
+        startBtn.style.opacity = "1";
+        startBtn.style.pointerEvents = "auto";
+
+      } catch (err) {
+        console.error("Lỗi khởi tạo:", err);
+        renderDataToSlides(null);
+        isReadyToPlay = true;
+        overlayText.innerText = "Chạm để bắt đầu";
+        startBtn.style.opacity = "1";
+        startBtn.style.pointerEvents = "auto";
+      }
+    }
+
+    // HÀM QUÉT NGẦM TRONG KHI NGƯỜI DÙNG ĐANG XEM STORY & NGHE NHẠC
+    function startBackgroundResultPolling(sid) {
+      let attempts = 0;
+      const maxAttempts = 25; // Quét tối đa 35-40 giây
+
+      if (pollWorkerTimer) clearInterval(pollWorkerTimer);
+
+      pollWorkerTimer = setInterval(async () => {
+        attempts++;
+        try {
+          const res = await fetch(`/api/quiz/result/${encodeURIComponent(sid)}`);
+          if (res.ok) {
+            const updatedData = await res.json();
+            // Nếu AI đã sinh xong payload (có dữ liệu slides từ Gemini)
+            if (updatedData.status === 'COMPLETED' || (updatedData.wrapped && updatedData.wrapped.slides)) {
+              console.log("[Gemini Engine] Đã nhận được đầy đủ bài viết độc bản của AI!");
+              renderDataToSlides(updatedData); // Cập nhật đè chữ AI lên các thẻ Slide ngay lập tức!
+              clearInterval(pollWorkerTimer);
+            }
+          }
+        } catch (e) {
+          console.warn("Polling ngầm đang thử lại:", e);
+        }
+
+        if (attempts >= maxAttempts) {
+          clearInterval(pollWorkerTimer);
+        }
+      }, 1500);
+    }
+
+
+    function setupAudioEngine() {
+      if (!storyAudio) return;
+      storyAudio.preload = "auto";
+
+      storyAudio.addEventListener('timeupdate', () => {
+        if (!storyAudio.duration) return;
+        const timeLeft = storyAudio.duration - storyAudio.currentTime;
+        if (timeLeft <= FADE_TIME && !isFadingOut) {
+          isFadingOut = true;
+          let fadeOutTimer = setInterval(() => {
+            if (storyAudio.volume > 0.05) {
+              storyAudio.volume = Math.max(0, storyAudio.volume - 0.05);
+            } else {
+              storyAudio.volume = 0;
+              clearInterval(fadeOutTimer);
+            }
+          }, 50);
+        }
+      });
+
+      storyAudio.addEventListener('ended', () => {
+        storyAudio.currentTime = 0;
+        storyAudio.volume = 0;
+        isFadingOut = false;
+        storyAudio.play().then(() => {
+          let fadeInTimer = setInterval(() => {
+            if (storyAudio.volume < 0.95) {
+              storyAudio.volume = Math.min(1.0, storyAudio.volume + 0.05);
+            } else {
+              storyAudio.volume = 1.0;
+              clearInterval(fadeInTimer);
+            }
+          }, 50);
+        });
+      });
+    }
+
+    // BẮT ĐẦU TRẢI NGHIỆM VỚI FADE-IN TỪ 0.25 LÊN 1.0 TRONG 2 GIÂY
+    function startStoryExperience() {
+      if (!isReadyToPlay) return;
+      document.getElementById('startOverlay').classList.add('hidden');
+      if (storyAudio) {
+        storyAudio.currentTime = 0;
+        storyAudio.volume = 0.25;
+        storyAudio.play().then(() => {
+          const stepInterval = 50; 
+          const totalSteps = 2000 / stepInterval;
+          const volumeStep = (1.0 - 0.25) / totalSteps;
+
+          let fadeInInitial = setInterval(() => {
+            if (storyAudio.volume < 1.0 - volumeStep) {
+              storyAudio.volume = Math.min(1.0, storyAudio.volume + volumeStep);
+            } else {
+              storyAudio.volume = 1.0;
+              clearInterval(fadeInInitial);
+            }
+          }, stepInterval);
+        }).catch(e => console.error("Autoplay blocked:", e));
+      }
+      showSlide(0);
+    }
+
+    // 3. ĐIỀU HƯỚNG SLIDE & THANH TIẾN TRÌNH
+    const TOTAL_SLIDES = 5;
+    const SLIDE_DURATION = 8000;
+    const FINAL_SLIDE_DURATION = 10000;
+    let currentSlide = 0;
+    let slideTimer = null;
+    let progressStartTime = 0;
+
+    function showSlide(index) {
+      if (index < 0 || index >= TOTAL_SLIDES) return;
+
+      document.querySelectorAll('.story-slide').forEach((sl, idx) => {
+        sl.classList.toggle('active', idx === index);
+      });
+
+      const endModal = document.getElementById('endModalOverlay');
+      if (endModal) endModal.classList.remove('active');
+
+      for (let i = 0; i < TOTAL_SLIDES; i++) {
+        const fill = document.getElementById(`prog-${i}`);
+        if (i < index) fill.style.width = '100%';
+        else if (i > index) fill.style.width = '0%';
+      }
+
+      currentSlide = index;
+      startProgressLoop();
+    }
+
+    function startProgressLoop() {
+      if (slideTimer) cancelAnimationFrame(slideTimer);
+      progressStartTime = performance.now();
+      const currentDuration = (currentSlide === TOTAL_SLIDES - 1) ? FINAL_SLIDE_DURATION : SLIDE_DURATION;
+
+      function updateProgress(now) {
+        const elapsed = now - progressStartTime;
+        const pct = Math.min(100, (elapsed / currentDuration) * 100);
+        document.getElementById(`prog-${currentSlide}`).style.width = pct + '%';
+
+        if (elapsed < currentDuration) {
+          slideTimer = requestAnimationFrame(updateProgress);
+        } else {
+          if (currentSlide < TOTAL_SLIDES - 1) {
+            nextSlide();
+          } else {
+            const endModal = document.getElementById('endModalOverlay');
+            if (endModal) endModal.classList.add('active');
+          }
+        }
+      }
+      slideTimer = requestAnimationFrame(updateProgress);
+    }
+
+    function nextSlide() {
+      if (currentSlide < TOTAL_SLIDES - 1) showSlide(currentSlide + 1);
+      else {
+        const endModal = document.getElementById('endModalOverlay');
+        if (endModal) endModal.classList.add('active');
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) showSlide(currentSlide - 1);
+      else showSlide(0);
+    }
+
+    // 4. GẮN DỮ LIỆU ĐỘNG TỪ BẢNG QUIZ & GEMINI
+    function renderDataToSlides(quizData) {
+      const now = new Date();
+      document.getElementById('val-date').innerText = `(${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()})`;
+
+      const storedAge = localStorage.getItem('xmen_user_age');
+      let userAge = storedAge ? parseInt(storedAge, 10) : ((quizData && quizData.user_age) ? quizData.user_age : 24);
+
+      const storedStressAge = localStorage.getItem('xmen_hair_stress_age');
+      const hairStressAge = (quizData && quizData.hair_stress_age) 
+        ? quizData.hair_stress_age 
+        : (storedStressAge ? parseInt(storedStressAge, 10) : (userAge + 3));
+
+      const scalpProfile = (quizData && quizData.scalp_profile) ? quizData.scalp_profile : "OIL-PRONE & GÀU";
+      const exposureLevel = (quizData && quizData.exposure_level) ? quizData.exposure_level : "HIGH";
+
+      const storedRootPct = localStorage.getItem('xmen_root_pct');
+      const rootPct = (quizData && quizData.root_solving_pct) 
+        ? Math.round(quizData.root_solving_pct) 
+        : (storedRootPct ? parseInt(storedRootPct, 10) : 50);
+
+      const storedGiq = localStorage.getItem('xmen_grooming_iq');
+      const giqScore = (quizData && quizData.grooming_iq) 
+        ? quizData.grooming_iq 
+        : (storedGiq ? parseInt(storedGiq, 10) : 65);
+      
+      const storedArchetype = localStorage.getItem('xmen_archetype_title');
+      const archetypeTitle = (quizData && quizData.archetype && quizData.archetype.title) 
+        ? quizData.archetype.title.toUpperCase() 
+        : (storedArchetype ? storedArchetype.toUpperCase() : "THE ROUTINE MAN!");
+
+      const wrapped = (quizData && quizData.wrapped) ? quizData.wrapped : {};
+      const slides = wrapped.slides || {};
+      const finalCard = slides.slide_4_final_card || {};
+      const scoring = quizData ? (quizData.scoring || {}) : {};
+      const archScoring = scoring.archetype || {};
+      const dimensions = scoring.dimensions || {};
+
+      // Slide 1: Tuổi thật vs Tuổi chân tóc
+      document.getElementById('val-user-age').innerText = userAge;
+      document.getElementById('val-stress-age').innerText = hairStressAge;
+
+      // Slide 2: Ảnh nghệ sĩ + Da đầu + Áp lực
+      if (currentTrack) {
+        const imgArtist = document.getElementById('val-artist-img');
+        imgArtist.src = currentTrack.artist_portrait_url;
+        imgArtist.onerror = function() { this.src = currentTrack.cover_url; };
+      }
+      document.getElementById('val-scalp-title').innerText = scalpProfile;
+      document.getElementById('val-exposure-level').innerText = exposureLevel.toUpperCase();
+      if (slides.slide_2_exposure_condition && slides.slide_2_exposure_condition.body) {
+        document.getElementById('val-exposure-desc').innerText = slides.slide_2_exposure_condition.body;
+      }
+
+      // Slide 3: Tỷ lệ Club Brothers & 4 Thẻ Your Type
+      const clubPercentage = Math.max(12, Math.min(88, 100 - rootPct + 15));
+      document.getElementById('val-survival-rate').innerText = `${clubPercentage}%`;
+
+      const cardColors = ['#00F5D4', '#FEE440', '#FF007F', '#fb923c'];
+      const expLevelText = dimensions.root_exposure ? dimensions.root_exposure.level : "Active";
+      const scalpText = dimensions.current_condition ? dimensions.current_condition.scalp_profile : "Balanced";
+      const cardsData = [
+        { title: expLevelText, sub: "Thời gian", badge: "Đội mũ" },
+        { title: exposureLevel, sub: "Khói bụi", badge: "Tác động" },
+        { title: scalpText, sub: "Tình trạng", badge: "Da đầu" },
+        { title: `${rootPct}%`, sub: "Gốc rễ", badge: "Bản lĩnh" }
+      ];
+
+      document.getElementById('cards-grid').innerHTML = cardsData.map((c, i) => `
+        <div style="position: relative; width: 82px;">
+          <div style="width: 82px; height: 82px; background: #1c1c1c; border: 2px solid #F0F0EB; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6px 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.4);">
+            <span style="font-size: 11px; font-weight: 900; color: ${cardColors[i]}; line-height: 1.1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:74px;">${c.title}</span>
+            <span style="font-size: 8.5px; font-weight: 700; color: #a3a3a3; margin-top: 4px; text-transform: uppercase;">${c.sub}</span>
+          </div>
+          <div style="position: absolute; left: 0; bottom: -15px; background: #F0F0EB; color: #292929; font-size: 9px; font-weight: 900; padding: 3px 6px; border-radius: 1px; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.35);">${c.badge}</div>
+        </div>
+      `).join('');
+
+      // Slide 4: Track info + Thói quen & Tác động
+      if (currentTrack) {
+        document.getElementById('track-title').innerText = currentTrack.title;
+        document.getElementById('track-artist').innerText = currentTrack.artist;
+        const imgCover = document.getElementById('track-cover');
+        imgCover.src = currentTrack.cover_url;
+        imgCover.onerror = function() { this.src = currentTrack.artist_portrait_url; };
+      }
+
+      const habits = slides.slide_3_grooming_gap && slides.slide_3_grooming_gap.bad_habits 
+        ? slides.slide_3_grooming_gap.bad_habits 
+        : ["Dùng dầu gội tùy tiện", "Lười che chắn khói bụi"];
+      
+      const impacts = slides.slide_3_grooming_gap && slides.slide_3_grooming_gap.scalp_impacts 
+        ? slides.slide_3_grooming_gap.scalp_impacts 
+        : ["Tích tụ bã nhờn nang tóc", "Bết dầu nhanh sau 4h"];
+
+      document.getElementById('list-habits').innerHTML = habits.slice(0, 2).map((h, i) => 
+        `<li style="margin-bottom: 6px; line-height: 1.25;"><span style="color:#737373; width:12px; display:inline-block;">${i+1}</span> ${h}</li>`
+      ).join('');
+      
+      document.getElementById('list-impacts').innerHTML = impacts.slice(0, 2).map((m, i) => 
+        `<li style="margin-bottom: 6px; line-height: 1.25;"><span style="color:#737373; width:12px; display:inline-block;">${i+1}</span> ${m}</li>`
+      ).join('');
+
+      const fragranceMaskingPct = (quizData && quizData.fragrance_masking_pct) 
+        ? Math.round(quizData.fragrance_masking_pct) 
+        : (100 - rootPct);
+      
+      const gapStatEl = document.getElementById('val-gap-stat');
+      if (gapStatEl) gapStatEl.innerText = `${fragranceMaskingPct}%`;
+
+      const gapDescEl = document.getElementById('val-gap-desc');
+      if (gapDescEl) {
+        const gapDescText = (slides.slide_3_grooming_gap && slides.slide_3_grooming_gap.gap_desc)
+          ? slides.slide_3_grooming_gap.gap_desc
+          : "Khoảng cách giữa tiêu chuẩn lý tưởng và hành vi tiện tay.";
+        gapDescEl.innerText = gapDescText;
+      }
+
+      // Slide 5: Tổng kết bản lĩnh
+      document.getElementById('val-giq').innerText = `G-IQ ${giqScore}`;
+      document.getElementById('val-courage').innerText = `Bản Lĩnh ${rootPct}%`;
+
+      const archEl = document.getElementById('val-archetype');
+      archEl.innerText = archetypeTitle;
+      if (archetypeTitle.length > 20) {
+        archEl.style.fontSize = '70px';
+      } else if (archetypeTitle.length > 15) {
+        archEl.style.fontSize = '78px';
+      } else {
+        archEl.style.fontSize = '88px';
+      }
+
+      const sloganText = wrapped.tagline || finalCard.subtitle || archScoring.subtitle || "Thơm trước. Tính sau";
+      document.getElementById('val-slogan').innerText = sloganText;
+
+      const quoteText = finalCard.quote || archScoring.quote || "Hương thơm cứu vãn tình thế, nhưng gốc rễ vấn đề vẫn nằm ở đó.";
+      document.getElementById('val-quote').innerText = `“${quoteText}”`;
+
+      const strengthText = finalCard.strength || archScoring.strength || "Chủ động chăm sóc bản thân.";
+      const strengthEl = document.getElementById('val-strength');
+      strengthEl.innerText = strengthText;
+      strengthEl.style.fontSize = strengthText.length > 45 ? '28px' : '34px';
+
+      const blindspotText = finalCard.blind_spot || archScoring.blind_spot || "Giải quyết bề nổi của thói quen.";
+      const blindspotEl = document.getElementById('val-blindspot');
+      blindspotEl.innerText = blindspotText;
+      blindspotEl.style.fontSize = blindspotText.length > 45 ? '28px' : '34px';
+
+      const adviceText = finalCard.golden_advice || "Đầu tư ngay sản phẩm chuyên sâu cho da đầu.";
+      const adviceEl = document.getElementById('val-advice');
+      adviceEl.innerText = adviceText;
+      adviceEl.style.fontSize = adviceText.length > 60 ? '30px' : '36px';
+    }
+
+    // 5. CÁC HÀM ĐIỀU KHIỂN KẾT THÚC (SAVE, NHẬN QUÀ, REPLAY, RETAKE)
+    async function saveFinalWrapped(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const btnText = document.getElementById('btnSaveText');
+      const oldText = btnText.innerText;
+      btnText.innerText = "ĐANG TẠO ẢNH...";
+
+      const cardEl = document.getElementById('finalCardToShare');
+      try {
+        const canvas = await html2canvas(cardEl, {
+          backgroundColor: "#292929",
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false
+        });
+
+        const imageURL = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = `xmen-wrapped-2026-${Date.now()}.png`;
+        link.href = imageURL;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error("Lỗi xuất ảnh:", err);
+        alert("Bạn có thể chụp màn hình tấm thẻ này để chia sẻ nhé!");
+      } finally {
+        btnText.innerText = oldText;
+      }
+    }
+
+    let discountTimer = null;
+    let discountStartTime = 0;
+    const DISCOUNT_DURATION = 10000; // 10 giây tự động quay về
+
+    // Bấm nút "NHẬN QUÀ" ở bảng kết thúc slide 5
+    function goToDiscount(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      // Dừng thanh tiến trình chính & Ẩn vùng chạm story cũ
+      if (slideTimer) cancelAnimationFrame(slideTimer);
+      const mainProgressBar = document.querySelector('.story-progress-bar');
+      if (mainProgressBar) mainProgressBar.style.display = 'none';
+
+      const touchLeft = document.querySelector('.nav-touch-left');
+      const touchRight = document.querySelector('.nav-touch-right');
+      if (touchLeft) touchLeft.style.display = 'none';
+      if (touchRight) touchRight.style.display = 'none';
+
+      // Ẩn bảng 4 lựa chọn
+      const endModal = document.getElementById('endModalOverlay');
+      if (endModal) endModal.classList.remove('active');
+
+      // Mở màn hình Discount
+      const discountOverlay = document.getElementById('discountOverlay');
+      if (discountOverlay) {
+        discountOverlay.style.opacity = '1';
+        discountOverlay.style.visibility = 'visible';
+        discountOverlay.style.pointerEvents = 'auto';
+      }
+
+      startDiscountProgressLoop();
+    }
+
+    function startDiscountProgressLoop() {
+      if (discountTimer) cancelAnimationFrame(discountTimer);
+      discountStartTime = performance.now();
+
+      function updateDiscountProgress(now) {
+        const elapsed = now - discountStartTime;
+        const pct = Math.min(100, (elapsed / DISCOUNT_DURATION) * 100);
+        
+        const fillEl = document.getElementById('discountProgFill');
+        if (fillEl) fillEl.style.width = pct + '%';
+
+        if (elapsed < DISCOUNT_DURATION) {
+          discountTimer = requestAnimationFrame(updateDiscountProgress);
+        } else {
+          goBackFromDiscount();
+        }
+      }
+      discountTimer = requestAnimationFrame(updateDiscountProgress);
+    }
+
+    // Chạm nửa bên trái màn hình Discount hoặc hết giờ để quay về bảng kết thúc
+    function goBackFromDiscount(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      if (discountTimer) cancelAnimationFrame(discountTimer);
+
+      const discountOverlay = document.getElementById('discountOverlay');
+      if (discountOverlay) {
+        discountOverlay.style.opacity = '0';
+        discountOverlay.style.visibility = 'hidden';
+        discountOverlay.style.pointerEvents = 'none';
+      }
+
+      // Hiện lại thanh progress bar chung và vùng chạm điều hướng story chính
+      const mainProgressBar = document.querySelector('.story-progress-bar');
+      if (mainProgressBar) mainProgressBar.style.display = 'flex';
+
+      const touchLeft = document.querySelector('.nav-touch-left');
+      const touchRight = document.querySelector('.nav-touch-right');
+      if (touchLeft) touchLeft.style.display = 'block';
+      if (touchRight) touchRight.style.display = 'block';
+
+      // Hiện lại bảng kết thúc (chỗ mờ với 4 lựa chọn)
+      const endModal = document.getElementById('endModalOverlay');
+      if (endModal) endModal.classList.add('active');
+    }
+
+    // XEM LẠI STORY (Quay về Slide đầu tiên và phát lại nhạc)
+    function replayStory(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      const endModal = document.getElementById('endModalOverlay');
+      if (endModal) endModal.classList.remove('active');
+      
+      const discountOverlay = document.getElementById('discountOverlay');
+      if (discountOverlay) {
+        discountOverlay.style.opacity = '0';
+        discountOverlay.style.visibility = 'hidden';
+        discountOverlay.style.pointerEvents = 'none';
+      }
+
+      const mainProgressBar = document.querySelector('.story-progress-bar');
+      if (mainProgressBar) mainProgressBar.style.display = 'flex';
+
+      const touchLeft = document.querySelector('.nav-touch-left');
+      const touchRight = document.querySelector('.nav-touch-right');
+      if (touchLeft) touchLeft.style.display = 'block';
+      if (touchRight) touchRight.style.display = 'block';
+      
+      if (storyAudio) {
+        storyAudio.currentTime = 0;
+        storyAudio.volume = 1.0;
+        storyAudio.play().catch(e => console.log("Audio play error:", e));
+      }
+
+      showSlide(0);
+    }
+
+    // LÀM LẠI TEST (Quay về trang chủ quiz)
+    function retakeTheTest(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      if (storyAudio) {
+        try { storyAudio.pause(); } catch(e) {}
+      }
+
+      window.location.href = '/'; 
+    }
+
+    window.addEventListener('DOMContentLoaded', initWrappedStory);
+  </script>
+</body>
+</html>

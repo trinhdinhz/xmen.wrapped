@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>X-MEN WRAPPED 2026 — Đo Chỉ Số Bản Lĩnh Đàn Ông</title>
+  
+  <!-- Tailwind CSS & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brandGreen: '#BEE860',
+            brandDark: '#161616',
+            brandGold: '#CFB23C',
+            neonCyan: '#00F5D4',
+            neonPink: '#FF0055',
+            neonYellow: '#FEE440'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0c0c0c;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.04); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 text-white select-none">
+
+  <!-- Container chuẩn khung dọc Mobile -->
+  <div id="appContainer" class="relative w-full sm:max-w-[400px] h-screen sm:h-[780px] bg-brandDark sm:rounded-[36px] overflow-hidden shadow-2xl flex flex-col border border-neutral-800">
+    
+    <!-- ================= MÀN 1: ONBOARDING & NHẬP THÔNG TIN ================= -->
+    <div id="screenIntro" class="flex-1 flex flex-col justify-between p-6 bg-gradient-to-b from-neutral-900 via-[#181818] to-[#12140e]">
+      <div class="pt-6">
+        <div class="flex items-center justify-between mb-4">
+          <span class="inline-block px-3 py-1 bg-white/10 rounded-full text-[11px] font-extrabold tracking-widest text-brandGreen uppercase">
+            X-MEN WRAPPED 2026
+          </span>
+          <span class="text-neutral-500 font-bold text-xs tracking-wider">MARKETING EDITION</span>
+        </div>
+        <h1 class="text-3xl font-black leading-tight tracking-tight">
+          ĐO CHỈ SỐ<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-brandGreen via-brandGold to-neonYellow">
+            BẢN LĨNH ĐÀN ÔNG
+          </span>
+        </h1>
+        <p class="text-neutral-400 text-xs mt-3 leading-relaxed font-medium">
+          Soi chiếu thói quen phòng tắm, áp lực khói bụi đường phố và bóc trần "Grooming Gap" thực tế qua dữ liệu chuẩn.
+        </p>
+      </div>
+
+      <div class="space-y-4 my-auto">
+        <div>
+          <label class="block text-[11px] uppercase tracking-wider text-neutral-400 mb-1.5 font-bold">
+            Biệt danh / Nickname:
+          </label>
+          <input 
+            type="text" 
+            id="inputName" 
+            placeholder="Ví dụ: Hoàng Bảnh Tỏn, Tuấn Trùm Bết..."
+            value="Chiến thần Deadline" 
+            class="w-full bg-neutral-800/90 border border-neutral-700 rounded-2xl px-4 py-3 text-sm font-bold text-left focus:outline-none focus:border-brandGreen focus:ring-1 focus:ring-brandGreen transition-all text-white placeholder-neutral-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-[11px] uppercase tracking-wider text-neutral-400 mb-1.5 font-bold">
+            Tuổi sinh học khai báo:
+          </label>
+          <input 
+            type="number" 
+            id="inputAge" 
+            min="10" 
+            max="120" 
+            value="24" 
+            class="w-full bg-neutral-800/90 border border-neutral-700 rounded-2xl px-4 py-3 text-xl font-black text-center focus:outline-none focus:border-brandGreen focus:ring-1 focus:ring-brandGreen transition-all text-white"
+          />
+        </div>
+
+        <button 
+          id="btnStart"
+          onclick="startQuiz()"
+          class="w-full py-4 bg-brandGreen text-black font-extrabold text-sm rounded-2xl shadow-lg shadow-brandGreen/20 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center space-x-2 cursor-pointer mt-2"
+        >
+          <span>BẮT ĐẦU ĐO CHỈ SỐ</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="text-center text-[10.5px] text-neutral-500 pb-1 font-semibold tracking-wider">
+        AUTHENTIC GROOMING CAMPAIGN // XMEN.MCK.COM
+      </div>
+    </div>
+
+    <!-- ================= MÀN 2: BỘ CÂU HỎI TRẮC NGHIỆM ================= -->
+    <div id="screenQuiz" class="hidden flex-1 flex flex-col p-6 bg-gradient-to-b from-[#181818] to-black">
+      <div class="flex items-center space-x-2 mb-4 pt-2">
+        <div class="flex-1 bg-neutral-800 h-1.5 rounded-full overflow-hidden">
+          <div id="quizProgressBar" class="h-full bg-brandGreen transition-all duration-300 w-[14%]"></div>
+        </div>
+        <span id="quizCounter" class="text-xs font-bold text-neutral-400">1/7</span>
+      </div>
+
+      <div class="mb-4">
+        <span id="questionCategory" class="text-[10.5px] uppercase tracking-widest font-extrabold text-brandGreen">
+          ROOT EXPOSURE
+        </span>
+        <h2 id="questionText" class="text-lg font-bold mt-1 leading-snug">
+          Đang tải câu hỏi...
+        </h2>
+      </div>
+
+      <!-- Danh sách lựa chọn -->
+      <div id="optionsContainer" class="space-y-2.5 overflow-y-auto custom-scroll flex-1 pr-0.5">
+        <!-- Render động bằng JS -->
+      </div>
+
+      <!-- Nút quay lại câu trước -->
+      <div id="backButtonContainer" class="pt-2 min-h-[40px]">
+        <!-- Render động khi index > 0 -->
+      </div>
+    </div>
+
+    <!-- ================= MÀN 3: LOADING TỔNG HỢP KẾT QUẢ ================= -->
+    <div id="screenLoading" class="hidden flex-1 flex flex-col items-center justify-center p-8 bg-black text-center relative overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brandGreen/20 via-transparent to-transparent pulse-glow"></div>
+      
+      <div class="relative z-10 space-y-6">
+        <div class="relative w-20 h-20 mx-auto">
+          <div class="absolute inset-0 rounded-full border-4 border-neutral-800"></div>
+          <div class="absolute inset-0 rounded-full border-4 border-brandGreen border-t-transparent animate-spin"></div>
+          <div class="absolute inset-3 rounded-full bg-neutral-900 flex items-center justify-center text-brandGreen font-black text-base">
+            X
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-black tracking-tight mb-2">Đang Tổng Hợp Bản Lĩnh...</h3>
+          <p id="loadingStatusText" class="text-xs text-neutral-400 font-medium h-6">
+            Soi chiếu thói quen và tính toán Hair Stress Age...
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= LOGIC ĐIỀU HƯỚNG & GỬI API ================= -->
+  <script>
+    const API_BASE = (window.location.protocol.startsWith('http')) 
+      ? window.location.origin 
+      : "http://127.0.0.1:8000";
+
+    let quizQuestions = [];
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+
+    async function loadQuestions() {
+      try {
+        const res = await fetch(`${API_BASE}/api/quiz/questions`);
+        if (!res.ok) throw new Error("API questions không phản hồi");
+        const data = await res.json();
+        quizQuestions = data.questions;
+      } catch (err) {
+        console.warn("Sử dụng bộ câu hỏi dự phòng:", err);
+        quizQuestions = getFallbackQuestions();
+      }
+    }
+
+    function startQuiz() {
+      const nameInput = document.getElementById('inputName');
+      const ageInput = document.getElementById('inputAge');
+      
+      const name = nameInput ? nameInput.value.trim() : "Chiến thần Deadline";
+      const age = ageInput ? ageInput.value.trim() : "24";
+
+      // Lưu vào localStorage để quiz.html đọc dữ liệu
+      localStorage.setItem('xmen_user_name', name);
+      localStorage.setItem('xmen_user_age', age);
+
+      // Chuyển thẳng sang file quiz.html chuẩn Figma mới
+      window.location.href = `/quiz.html?name=${encodeURIComponent(name)}&age=${encodeURIComponent(age)}`;
+    }
+
+    function renderQuestion() {
+      if (document.activeElement) {
+        document.activeElement.blur();
+      }
+
+      const q = quizQuestions[currentQuestionIndex];
+      const total = quizQuestions.length;
+      
+      document.getElementById("quizCounter").innerText = `${currentQuestionIndex + 1}/${total}`;
+      document.getElementById("quizProgressBar").style.width = `${((currentQuestionIndex + 1) / total) * 100}%`;
+      document.getElementById("questionCategory").innerText = q.dimension || "DIMENSION";
+      document.getElementById("questionText").innerText = q.question;
+
+      const container = document.getElementById("optionsContainer");
+      container.innerHTML = "";
+
+      const selectedKey = userAnswers[q.id];
+
+      q.options.forEach(opt => {
+        const isSelected = (selectedKey === opt.key);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `w-full text-left p-3 rounded-2xl border transition-all flex items-start space-x-3 cursor-pointer outline-none ${
+          isSelected 
+            ? "bg-neutral-800 border-brandGreen shadow-md shadow-brandGreen/10" 
+            : "bg-neutral-800/60 hover:bg-neutral-800 border-neutral-700/80 hover:border-neutral-500"
+        }`;
+        
+        btn.innerHTML = `
+          <span class="w-6 h-6 rounded-full ${isSelected ? 'bg-brandGreen text-black font-black' : 'bg-white/10 text-white font-bold'} text-xs flex items-center justify-center shrink-0 mt-0.5">${opt.key}</span>
+          <span class="text-xs font-semibold text-neutral-200 leading-snug">${opt.label}</span>
+        `;
+        btn.onclick = () => selectOption(q.id, opt.key);
+        container.appendChild(btn);
+      });
+
+      const backContainer = document.getElementById("backButtonContainer");
+      backContainer.innerHTML = "";
+      if (currentQuestionIndex > 0) {
+        const backBtn = document.createElement("button");
+        backBtn.type = "button";
+        backBtn.className = "w-full py-1.5 text-xs font-bold text-neutral-400 hover:text-white transition-all flex items-center justify-center space-x-1 cursor-pointer";
+        backBtn.innerHTML = `<span>← Quay lại câu trước</span>`;
+        backBtn.onclick = prevQuestion;
+        backContainer.appendChild(backBtn);
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion();
+      }
+    }
+
+    async function selectOption(questionId, optionKey) {
+      userAnswers[questionId] = optionKey;
+      
+      if (currentQuestionIndex < quizQuestions.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        await submitQuiz();
+      }
+    }
+
+    async function submitQuiz() {
+      document.getElementById("screenQuiz").classList.add("hidden");
+      document.getElementById("screenLoading").classList.remove("hidden");
+
+      const userName = document.getElementById("inputName").value.trim() || "Chiến thần Deadline";
+      const userAge = parseInt(document.getElementById("inputAge").value, 10) || 24;
+
+      const payload = {
+        user_name: userName,
+        user_age: userAge,
+        answers: userAnswers
+      };
+
+      const statuses = [
+        "Đo lường áp lực mũ bảo hiểm và khói bụi...",
+        "Tính toán Hair Stress Age...",
+        "Bóc mẽ Grooming Gap giữa nói và làm...",
+        "Gemini AI đang sinh hồ sơ Story Spotify Wrapped..."
+      ];
+      let sIdx = 0;
+      const sInterval = setInterval(() => {
+        sIdx = (sIdx + 1) % statuses.length;
+        document.getElementById("loadingStatusText").innerText = statuses[sIdx];
+      }, 1400);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/quiz/submit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) {
+          const errDetail = await res.text();
+          throw new Error(errDetail);
+        }
+
+        const data = await res.json();
+        clearInterval(sInterval);
+
+        // Chuyển hướng trực tiếp sang trang Web Story Wrapped kèm session_id
+        if (data.session_id) {
+          window.location.href = `/index2.html?session=${data.session_id}`;
+        } else {
+          window.location.href = `/index2.html`;
+        }
+
+      } catch (err) {
+        clearInterval(sInterval);
+        console.error("Lỗi nộp bài Quiz:", err);
+        alert("Không thể kết nối FastAPI backend. Hãy chắc chắn server python warp/main.py đang chạy!");
+        document.getElementById("screenLoading").classList.add("hidden");
+        document.getElementById("screenQuiz").classList.remove("hidden");
+      }
+    }
+
+    function getFallbackQuestions() {
+      return [
+        { id: "Q1", dimension: "ROOT EXPOSURE", question: "Ngày thường, ông phải đội mũ bảo hiểm khoảng bao lâu?", options: [ {key: "A", label: "Dưới 30 phút"}, {key: "B", label: "30 phút – 1 giờ"}, {key: "C", label: "1 – 2 giờ"}, {key: "D", label: "Hơn 2 giờ"} ] },
+        { id: "Q2", dimension: "ROOT EXPOSURE", question: "Phần lớn một ngày của ông diễn ra ở đâu?", options: [ {key: "A", label: "Phòng máy lạnh cả ngày"}, {key: "B", label: "Trong nhà nhưng hay ra đường"}, {key: "C", label: "Ngoài trời khá nhiều"}, {key: "D", label: "Ngoài trời / vận động nhiều"} ] },
+        { id: "Q3", dimension: "CURRENT CONDITION", question: "Cuối ngày, tình trạng da đầu của ông giống nhất với mô tả nào?", options: [ {key: "A", label: "Vẫn sạch và khô thoáng"}, {key: "B", label: "Hơi bết nhưng không khó chịu"}, {key: "C", label: "Bết rõ, tóc dễ xẹp"}, {key: "D", label: "Bết + ngứa / khó chịu"}, {key: "E", label: "Có vảy/gàu nhìn thấy được"} ] },
+        { id: "Q4", dimension: "CURRENT CONDITION", question: "Sau khi gội đầu, ông thường thấy bao nhiêu tóc rụng?", options: [ {key: "A", label: "Gần như không thấy"}, {key: "B", label: "Có vài sợi, bình thường"}, {key: "C", label: "Khá nhiều, bắt đầu để ý"}, {key: "D", label: "Nhiều đến mức thực sự lo"} ] },
+        { id: "Q5", dimension: "GROOMING BEHAVIOR", question: "Khi chọn sản phẩm grooming, thứ ông nhìn vào đầu tiên là gì?", options: [ {key: "A", label: "Mùi thơm — thơm là thắng"}, {key: "B", label: "Cảm giác mát lạnh sau dùng"}, {key: "C", label: "Công dụng (sạch, giảm dầu/gàu)"}, {key: "D", label: "Thành phần hoạt chất"}, {key: "E", label: "Combo cả công dụng + thành phần"} ] },
+        { id: "Q6", dimension: "GROOMING BEHAVIOR", question: "Nếu chai dầu gội hiện tại hết hôm nay, ông sẽ...", options: [ {key: "A", label: "Lấy đại chai khác trong nhà dùng"}, {key: "B", label: "Mua đúng chai cũ"}, {key: "C", label: "Ra tiệm chọn chai có mùi thích"}, {key: "D", label: "Tìm sản phẩm giải quyết đúng vấn đề"}, {key: "E", label: "Check thành phần rồi mới mua"} ] },
+        { id: "Q7", dimension: "GROOMING MINDSET", question: "Theo ông, grooming của đàn ông thực sự là gì?", options: [ {key: "A", label: "Thơm để người khác dễ chịu"}, {key: "B", label: "Gọn gàng để trông phong độ"}, {key: "C", label: "Chăm sóc để tự tin hơn"}, {key: "D", label: "Hiểu cơ thể và giải quyết đúng vấn đề"}, {key: "E", label: "Tự biết mình cần gì và chủ động chăm sóc"} ] }
+      ];
+    }
+
+    window.addEventListener("DOMContentLoaded", loadQuestions);
+  </script>
+</body>
+</html>
