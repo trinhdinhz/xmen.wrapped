@@ -12,7 +12,7 @@ if str(SHARED_CONFIG_PATH) not in sys.path:
 
 from db_connection import get_engine  # type: ignore
 
-# 1. BẢNG LƯU KẾT QUẢ TEST & WRAPPED (ĐÃ BỔ SUNG STATUS VÀ CÂN CHỈNH LLM_PAYLOAD)
+# 1. BẢNG KẾT QUẢ TEST & WRAPPED
 CREATE_QUIZ_RECORDS_TABLE = """
 CREATE TABLE IF NOT EXISTS xmen_quiz_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS xmen_quiz_records (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 """
 
-# 2. BẢNG LƯU TRACK NHẠC SPOTIFY CHO CHIẾN DỊCH
+# 2. BẢNG TRACKS LƯU DANH SÁCH BÀI HÁT
 CREATE_TRACKS_TABLE = """
 CREATE TABLE IF NOT EXISTS tracks (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS tracks (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 """
 
-# 3. DỮ LIỆU SEED MẪU CHO 12 TRACK (NẾU BẢNG TRỐNG THÌ NẠP VÀO)
+# 3. DỮ LIỆU SEED MẪU CHO TRACKS (TỰ ĐỘNG BỎ QUA NẾU ĐÃ CÓ)
 SEED_TRACKS_SQL = """
 INSERT INTO tracks (id, title, artist, artist_portrait_url, cover_url, cut_url, full_url)
 VALUES 
@@ -64,24 +64,28 @@ VALUES
 (2, 'Chìm Sâu', 'RPT MCK (feat. Trung Trần)', 
  'https://res.cloudinary.com/kjby7u78/image/upload/v1790026521/discoverya.jpg', 
  'https://res.cloudinary.com/kjby7u78/image/upload/v1790027332/monsterb.jpg', 
- '/audio/track_2_cut.mp3', '/audio/track_2_full.mp3')
+ '/audio/track_2_cut.mp3', '/audio/track_2_full.mp3'),
+(3, 'Tại Vì Sao', 'RPT MCK', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027332/staytonightb.jpg', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027331/discoveryb.jpg', 
+ '/audio/track_3_cut.mp3', '/audio/track_3_full.mp3')
 ON DUPLICATE KEY UPDATE title=VALUES(title);
 """
 
-def init_database():
+def init_all_database():
     engine = get_engine('sandbox')
     with engine.begin() as conn:
-        # Khởi tạo bảng quiz records
+        # Tạo bảng kết quả bài test
         conn.execute(text(CREATE_QUIZ_RECORDS_TABLE))
-        print("[+] Khởi tạo bảng `xmen_quiz_records` thành công!")
+        print("[+] Đã khởi tạo bảng `xmen_quiz_records`!")
 
-        # Khởi tạo bảng tracks
+        # Tạo bảng bài hát tracks
         conn.execute(text(CREATE_TRACKS_TABLE))
-        print("[+] Khởi tạo bảng `tracks` thành công!")
+        print("[+] Đã khởi tạo bảng `tracks`!")
 
-        # Chèn dữ liệu seed (bạn có thể bổ sung đủ 12 track thực tế vào mảng VALUES)
+        # Nạp dữ liệu bài hát
         conn.execute(text(SEED_TRACKS_SQL))
-        print("[+] Nạp dữ liệu seed cho `tracks` thành công!")
+        print("[+] Đã nạp dữ liệu danh sách bài hát vào bảng `tracks`!")
 
 if __name__ == '__main__':
-    init_database()
+    init_all_database()
