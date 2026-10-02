@@ -71,6 +71,9 @@ python init_quiz_db.py
 #### d. Khởi chạy máy chủ API:
 
 ```bash
+# Terminal 1: Chạy API Server
 uvicorn main:app --reload
+
+# Terminal 2: Mở tunnel truy cập public
 ngrok http 8000
 ```
