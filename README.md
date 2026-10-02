@@ -39,3 +39,38 @@ Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu c�
 ├── main.py                 # FastAPI Application Entrypoint & RESTful Routing
 ├── requirements.txt        # Danh mục quản lý thư viện phụ thuộc (Dependencies)
 └── *.html                  # Giao diện trực quan hóa dữ liệu (Wrapped Story UI)
+```
+
+---
+
+### 4. Cài đặt & Triển khai (Quickstart)
+
+#### a. Khởi tạo môi trường & Cài đặt phụ thuộc:
+
+```bash
+pip install -r requirements.txt
+```
+
+#### b. Cấu hình môi trường (.env):
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=wrapped_db
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+#### c. Khởi tạo Database Schema:
+
+```bash
+python init_quiz_db.py
+```
+
+#### d. Khởi chạy máy chủ API:
+
+```bash
+uvicorn main:app --reload
+ngrok http 8000
+```
