@@ -46,8 +46,10 @@ Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu c�
 
 #### a. Khởi tạo môi trường & Cài đặt phụ thuộc:
 
+```text
 pip install -r requirements.txt
 ngrok http 8000
+```
 
 #### b. Cấu hình môi trường (.env):
 
@@ -62,8 +64,12 @@ GEMINI_API_KEY=your_gemini_api_key
 
 #### c. Khởi tạo Database Schema:
 
+```text
 python init_quiz_db.py
+```
 
 #### d. Khởi chạy máy chủ API:
 
+```text
 uvicorn main:app --reload
+```
