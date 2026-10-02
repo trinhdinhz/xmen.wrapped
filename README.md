@@ -1,29 +1,45 @@
 # xmen.wrapped
 
-Nền tảng tương tác tổng kết hành vi & AI Quiz Engine được xây dựng trên nền tảng **FastAPI**, **Gemini AI** và **MySQL/Cloudinary**, hoàn thành trọn gói (End-to-End) trong 3 ngày (20/09/2026 – 24/09/2026).
+Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu cá nhân hóa (Personalized Data Storytelling & Archetype Profiling), xây dựng trên kiến trúc bất đồng bộ (Async Backend) tích hợp LLM và kho lưu trữ đa phương tiện tối ưu hóa CDN.
 
 ---
 
-## Tính năng cốt lõi (Key Highlights)
-* **AI Quiz Generation & Scoring:** Tích hợp Google Gemini Engine tự động sinh câu hỏi và chấm điểm hành vi theo thời gian thực (`gemini_quiz_engine.py`, `quiz_scoring.py`).
-* **High-Performance Backend:** Xây dựng trên nền FastAPI + Uvicorn, xử lý luồng dữ liệu async tối ưu băng thông.
-* **Media & Database Pipeline:** Tích hợp SQLAlchemy + PyMySQL kết nối kho lưu trữ media đám mây (Cloudinary CDN).
-* **Interactive Frontend:** Hệ thống giao diện trực quan hóa dữ liệu (Wrapped Stories & Quiz Cards).
+### 1. Tính năng cốt lõi & Tư duy Kiến trúc (Key Engineering Highlights)
+
+* **Behavioral Archetype & Scoring Engine (`quiz_scoring.py`, `quiz_metadata.py`):** 
+  Thuật toán phân tích phản hồi hành vi, tính toán trọng số tương tác và định danh chân dung người dùng (User Persona Clustering) phục vụ chiến dịch cá nhân hóa nội dung số.
+* **LLM Integration & Dynamic Content (`gemini_quiz_engine.py`, `gemini_client.py`):** 
+  Xây dựng wrapper chuẩn hóa tương tác với Google GenAI SDK, tối ưu hóa Prompt Engineering để sinh nội dung tương tác theo ngữ cảnh thời gian thực.
+* **Async Backend & Connection Pooling (`main.py`, `db_connection.py`):** 
+  Backend hiệu năng cao phát triển trên FastAPI + Uvicorn; quản lý vòng đời truy vấn qua SQLAlchemy Connection Pooling nhằm tối ưu thông lượng (Throughput) và cách ly tải trọng cơ sở dữ liệu.
+* **Media Delivery Pipeline & Data Visualization (`*.html`):** 
+  Đồng bộ hóa metadata và đường dẫn media đám mây (Cloudinary CDN), giảm thiểu tải trọng tĩnh (Payload Size) để tối ưu thời gian phản hồi (Low-Latency UI Delivery).
 
 ---
 
-## Tech Stack
+### 2. Tech Stack
+
 * **Backend:** Python 3.10+, FastAPI, Uvicorn, Pydantic v2
-* **AI & LLM:** Google GenAI SDK (`google-genai`)
-* **Database & Storage:** MySQL (SQLAlchemy, PyMySQL), Cloudinary CDN
-* **Networking:** Requests, HTTPX
+* **Database & ORM:** MySQL, SQLAlchemy (Engine & Session Pooling), PyMySQL
+* **AI & LLM Services:** Google GenAI SDK (`google-genai`)
+* **Storage & Distribution:** Cloudinary CDN, HTTPX, Requests
+* **Networking & Tunneling:** ngrok (Public Ingress Tunneling), Requests, HTTPX
+---
+
+### 3. Cấu Trúc Repository
+
+```text
+├── db_connection.py        # Quản trị Pool kết nối MySQL & SQLAlchemy Session
+├── gemini_client.py        # Client Wrapper cấu hình Google GenAI SDK
+├── gemini_quiz_engine.py   # Engine xử lý logic sinh nội dung & Dynamic Prompts
+├── quiz_scoring.py         # Thuật toán tính điểm & phân loại User Persona
+├── quiz_metadata.py        # Metadata schemas, cấu hình luật chấm và archetype
+├── init_quiz_db.py         # Data Definition Script (DDL) khởi tạo schema DB
+├── main.py                 # FastAPI Application Entrypoint & RESTful Routing
+├── requirements.txt        # Danh mục quản lý thư viện phụ thuộc (Dependencies)
+└── *.html                  # Giao diện trực quan hóa dữ liệu (Wrapped Story UI)
+
 
 ---
 
-## Cài đặt & Cấu hình (Quickstart)
-
-### 1. Cài đặt thư viện phụ thuộc
-pip install fastapi>=0.100.0 uvicorn>=0.22.0 pydantic>=2.0.0 sqlalchemy>=2.0.0 pymysql>=1.1.0 google-genai>=0.1.0 requests>=2.31.0
-
-### 2. Cài đặt Database:
-python init_quiz_db.py
+### 3. Cấu Trúc Repository
