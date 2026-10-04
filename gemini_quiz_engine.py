@@ -1,19 +1,9 @@
-# /Users/anhnt/Documents/pythoncode/warp/gemini_quiz_engine.py
+# gemini_quiz_engine.py
 import json
 import sys
 import threading
 from pathlib import Path
 from typing import Dict, Any
-
-CURRENT_DIR = Path(__file__).resolve().parent
-if str(CURRENT_DIR) not in sys.path:
-    sys.path.append(str(CURRENT_DIR))
-
-SHARED_CONFIG_PATH = CURRENT_DIR.parent / 'shared_config'
-if not SHARED_CONFIG_PATH.exists():
-    SHARED_CONFIG_PATH = Path.home() / 'Documents/pythoncode/shared_config'
-if str(SHARED_CONFIG_PATH) not in sys.path:
-    sys.path.append(str(SHARED_CONFIG_PATH))
 
 from gemini_client import get_genai_client  # type: ignore
 from quiz_metadata import QUIZ_QUESTIONS_MAP  # type: ignore
@@ -41,8 +31,8 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
     behavior_data = dims.get("grooming_behavior", {})
     root_solving_str = f"{behavior_data.get('root_problem_solving_pct', 50)}%"
     fragrance_masking_str = f"{behavior_data.get('fragrance_masking_pct', 50)}%"
-    
-    return f"""
+
+    return f'''
 ### HỒ SƠ CHIẾN LƯỢC CỦA NGƯỜI LÀM TEST:
 - Tuổi thật: {quiz_result.get('user_age', 24)} | Tuổi chân tóc: {quiz_result.get('hair_stress_age', 26)} (+{quiz_result.get('delta_age', 2)} năm)
 - Grooming IQ: {quiz_result.get('grooming_iq', 60)}/100
@@ -61,9 +51,9 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
 ### 4 TRỤC DỮ LIỆU ĐỊNH LƯỢNG:
 - Root Exposure: {root_exp_level}
 - Scalp Profile: {scalp_profile}
-- Tỷ lệ giải quyết gốc rễ: {root_solving_pct}
-- Tỷ lệ che đậy hương thơm: {fragrance_masking_pct}
-"""
+- Tỷ lệ giải quyết gốc rễ: {root_solving_str}
+- Tỷ lệ che đậy hương thơm: {fragrance_masking_str}
+'''
 
 def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]:
     client = get_genai_client()
@@ -73,7 +63,7 @@ def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]
     is_low_helmet = ans.get("Q1") == "A"
     arch_title = arch.get("title", "THE ROUTINE MAN")
 
-    prompt = f"""
+    prompt = f'''
 Bạn là Giám đốc Sáng tạo Chiến dịch thương hiệu cho X-Men Wrapped 2026.
 Nhiệm vụ: Phân tích hồ sơ trắc nghiệm bên dưới và sinh JSON Wrapped sắc sảo, nam tính, có chất châm biếm nhẹ, hiện đại chuẩn phong cách Spotify Wrapped.
 
@@ -126,7 +116,7 @@ CHỈ TRẢ VỀ JSON THUẦN (KHÔNG MARKDOWN, KHÔNG ```json):
     }}
   }}
 }}
-"""
+'''
 
     with GEMINI_SEMAPHORE:
         # Sử dụng model flash trực tiếp, không truyền schema phức tạp để tránh AFC warning và độ trễ
