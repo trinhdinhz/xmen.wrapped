@@ -25,6 +25,7 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
     dims = quiz_result.get("dimensions", {})
     arch = quiz_result.get("archetype", {})
 
+    # 1. Bóc tách câu trả lời thực tế
     q1_val = QUIZ_QUESTIONS_MAP.get("Q1", {}).get("options", {}).get(ans.get("Q1", "A"), {}).get("label", "")
     q2_val = QUIZ_QUESTIONS_MAP.get("Q2", {}).get("options", {}).get(ans.get("Q2", "A"), {}).get("label", "")
     q3_val = QUIZ_QUESTIONS_MAP.get("Q3", {}).get("options", {}).get(ans.get("Q3", "A"), {}).get("label", "")
@@ -33,6 +34,14 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
     q6_val = QUIZ_QUESTIONS_MAP.get("Q6", {}).get("options", {}).get(ans.get("Q6", "A"), {}).get("label", "")
     q7_val = QUIZ_QUESTIONS_MAP.get("Q7", {}).get("options", {}).get(ans.get("Q7", "A"), {}).get("label", "")
 
+    # 2. Bóc tách sẵn 4 trục dữ liệu định lượng ra biến riêng (Không để lồng trong f-string)
+    root_exp_level = dims.get("root_exposure", {}).get("level", "Moderate")
+    scalp_profile = dims.get("current_condition", {}).get("scalp_profile", "Moderate Oil")
+    
+    behavior_data = dims.get("grooming_behavior", {})
+    root_solving_str = f"{behavior_data.get('root_problem_solving_pct', 50)}%"
+    fragrance_masking_str = f"{behavior_data.get('fragrance_masking_pct', 50)}%"
+    
     return f"""
 ### HỒ SƠ CHIẾN LƯỢC CỦA NGƯỜI LÀM TEST:
 - Tuổi thật: {quiz_result.get('user_age', 24)} | Tuổi chân tóc: {quiz_result.get('hair_stress_age', 26)} (+{quiz_result.get('delta_age', 2)} năm)
@@ -50,10 +59,10 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
 7. Định nghĩa bản lĩnh grooming (Q7): [{ans.get('Q7')}] "{q7_val}"
 
 ### 4 TRỤC DỮ LIỆU ĐỊNH LƯỢNG:
-- Root Exposure: {dims.get('root_exposure', {}).get('level', 'Moderate')}
-- Scalp Profile: {dims.get('current_condition', {}).get('scalp_profile', 'Moderate Oil')}
-- Tỷ lệ giải quyết gốc rễ: {dims.get('grooming_behavior', {}).get('root_problem_solving_pct', 50)}%
-- Tỷ lệ che đậy hương thơm: {dims.get('grooming_behavior', {}).get('fragrance_masking_pct', 50)}%
+- Root Exposure: {root_exp_level}
+- Scalp Profile: {scalp_profile}
+- Tỷ lệ giải quyết gốc rễ: {root_solving_pct}
+- Tỷ lệ che đậy hương thơm: {fragrance_masking_pct}
 """
 
 def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]:
