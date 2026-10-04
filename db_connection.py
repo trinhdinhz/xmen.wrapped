@@ -5,11 +5,11 @@ from urllib.parse import quote_plus
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
-# 1. Tự động load file .env nằm cùng thư mục dự án
+# 1. Automatically load .env from the project root directory
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / '.env')
 
-# 2. Đọc biến môi trường (với giá trị mặc định fallback an toàn)
+# 2. Load MySQL credentials from environment variables
 DB_USER = os.getenv('DB_USER', 'root')
 DB_PASS = os.getenv('DB_PASS', '')
 DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
@@ -44,7 +44,6 @@ def get_engine(db_name=None):
 
 def test_connection():
     try:
-        # Thử kết nối không cần chỉ định database trước
         engine = get_engine(db_name='')
         with engine.connect() as conn:
             result = conn.execute(text("SELECT VERSION(), NOW();")).fetchone()
