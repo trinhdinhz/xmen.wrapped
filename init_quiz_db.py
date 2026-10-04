@@ -1,20 +1,15 @@
-# /Users/anhnt/Documents/pythoncode/warp/init_quiz_db.py
-import sys
-from pathlib import Path
+# init_quiz_db.py
 from sqlalchemy import text
+from db_connection import get_engine
 
-CURRENT_DIR = Path(__file__).resolve().parent
-SHARED_CONFIG_PATH = CURRENT_DIR.parent / 'shared_config'
-if not SHARED_CONFIG_PATH.exists():
-    SHARED_CONFIG_PATH = Path.home() / 'Documents/pythoncode/shared_config'
-if str(SHARED_CONFIG_PATH) not in sys.path:
-    sys.path.append(str(SHARED_CONFIG_PATH))
+# 0. TẠO MỚI SCHEMA
+CREATE_SCHEMA = """
+CREATE SCHEMA IF NOT EXISTS xmen_wrapped DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+"""
 
-from db_connection import get_engine  # type: ignore
-
-# 1. BẢNG KẾT QUẢ TEST & WRAPPED
+# 1. BẢNG KẾT QUẢ TEST & WRAPPED (Chỉ định rõ xmen_wrapped.)
 CREATE_QUIZ_RECORDS_TABLE = """
-CREATE TABLE IF NOT EXISTS xmen_quiz_records (
+CREATE TABLE IF NOT EXISTS xmen_wrapped.xmen_quiz_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
     session_id VARCHAR(64) NOT NULL UNIQUE,
     user_age INT NOT NULL,
@@ -32,7 +27,6 @@ CREATE TABLE IF NOT EXISTS xmen_quiz_records (
     scoring_data JSON NOT NULL,
     llm_payload JSON NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_session (session_id),
     INDEX idx_status (status),
     INDEX idx_archetype (archetype_code),
     INDEX idx_created (created_at)
@@ -41,7 +35,7 @@ CREATE TABLE IF NOT EXISTS xmen_quiz_records (
 
 # 2. BẢNG TRACKS LƯU DANH SÁCH BÀI HÁT
 CREATE_TRACKS_TABLE = """
-CREATE TABLE IF NOT EXISTS tracks (
+CREATE TABLE IF NOT EXISTS xmen_wrapped.tracks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(150) NOT NULL,
     artist VARCHAR(100) NOT NULL,
@@ -53,9 +47,9 @@ CREATE TABLE IF NOT EXISTS tracks (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 """
 
-# 3. DỮ LIỆU SEED MẪU CHO TRACKS (TỰ ĐỘNG BỎ QUA NẾU ĐÃ CÓ)
+# 3. DỮ LIỆU SEED MẪU CHO TRACKS
 SEED_TRACKS_SQL = """
-INSERT INTO tracks (id, title, artist, artist_portrait_url, cover_url, cut_url, full_url)
+INSERT INTO xmen_wrapped.tracks (id, title, artist, artist_portrait_url, cover_url, cut_url, full_url)
 VALUES 
 (1, 'Thủ Đô Cypher', 'RPT MCK, Orijinn, Wxrdie', 
  'https://res.cloudinary.com/kjby7u78/image/upload/v1790025881/staytonighta.jpg', 
@@ -73,19 +67,26 @@ ON DUPLICATE KEY UPDATE title=VALUES(title);
 """
 
 def init_all_database():
-    engine = get_engine('sandbox')
-    with engine.begin() as conn:
-        # Tạo bảng kết quả bài test
+    # Bước 1: Mở kết nối cấp máy chủ (chưa cần chỉ định database) để tạo Schema an toàn
+    server_engine = get_engine(db_name='')
+    with server_engine.begin() as conn:
+        conn.execute(text(CREATE_SCHEMA))
+        print("[+] Đã kiểm tra/khởi tạo Schema `xmen_wrapped`!")
+
+    # Bước 2: Kết nối trực tiếp vào xmen_wrapped để tạo bảng và nạp seed data
+    app_engine = get_engine('xmen_wrapped')
+    with app_engine.begin() as conn:
+        # Tạo bảng kết quả test
         conn.execute(text(CREATE_QUIZ_RECORDS_TABLE))
         print("[+] Đã khởi tạo bảng `xmen_quiz_records`!")
 
-        # Tạo bảng bài hát tracks
+        # Tạo bảng tracks
         conn.execute(text(CREATE_TRACKS_TABLE))
         print("[+] Đã khởi tạo bảng `tracks`!")
 
-        # Nạp dữ liệu bài hát
+        # Nạp dữ liệu seed
         conn.execute(text(SEED_TRACKS_SQL))
-        print("[+] Đã nạp dữ liệu danh sách bài hát vào bảng `tracks`!")
+        print("[+] Đã nạp dữ liệu mẫu vào bảng `tracks` thành công!")
 
 if __name__ == '__main__':
     init_all_database()
