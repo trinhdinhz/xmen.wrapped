@@ -1,4 +1,4 @@
-# xmen.wrapped
+# X-Men Wrapped Engine
 
 Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu cá nhân hóa (Personalized Data Storytelling & Archetype Profiling), xây dựng trên kiến trúc bất đồng bộ (Async Backend) tích hợp LLM và kho lưu trữ đa phương tiện tối ưu hóa CDN.
 
@@ -6,21 +6,23 @@ Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu c�
 
 ### 1. Tính năng cốt lõi & Tư duy Kiến trúc (Key Engineering Highlights)
 
-* **Behavioral Archetype & Scoring Engine (`quiz_scoring.py`, `quiz_metadata.py`):** 
-  Thuật toán phân tích phản hồi hành vi, tính toán trọng số tương tác và định danh chân dung người dùng (User Persona Clustering) phục vụ chiến dịch cá nhân hóa nội dung số.
-* **LLM Integration & Dynamic Content (`gemini_quiz_engine.py`, `gemini_client.py`):** 
-  Xây dựng wrapper chuẩn hóa tương tác với Google GenAI SDK, tối ưu hóa Prompt Engineering để sinh nội dung tương tác theo ngữ cảnh thời gian thực.
-* **Async Backend & Connection Pooling (`main.py`, `db_connection.py`):** 
-  Backend hiệu năng cao phát triển trên FastAPI + Uvicorn; quản lý vòng đời truy vấn qua SQLAlchemy Connection Pooling nhằm tối ưu thông lượng (Throughput) và cách ly tải trọng cơ sở dữ liệu.
-* **Media Delivery Pipeline & Data Visualization (`*.html`):** 
-  Đồng bộ hóa metadata và đường dẫn media đám mây (Cloudinary CDN), giảm thiểu tải trọng tĩnh (Payload Size) để tối ưu thời gian phản hồi (Low-Latency UI Delivery).
+* **Behavioral Archetype & Scoring Engine (`quiz_scoring.py`, `quiz_metadata.py`):**  
+  Thuật toán định lượng phản hồi hành vi, tính toán trọng số tương tác đa chiều và định danh chân dung người dùng (User Persona Clustering) phục vụ chiến dịch cá nhân hóa nội dung số.
+* **Asynchronous Background Task & Concurrency Throttling (`main.py`):**  
+  Kiến trúc xử lý nền (Producer-Consumer via Threading) tách rời luồng ghi nhận HTTP Request và luồng sinh nội dung LLM. Triển khai cơ chế giới hạn tải đồng thời (`MAX_CONCURRENT_LLM = 10`) với Thread Lock nhằm kiểm soát trần tài nguyên và ngăn ngừa cạn kiệt Connection Pool.
+* **LLM Integration & Dynamic Content (`gemini_quiz_engine.py`, `gemini_client.py`):**  
+  Wrapper chuẩn hóa tương tác với Google GenAI SDK, tối ưu hóa Prompt Engineering để sinh dữ liệu JSON có cấu trúc (Structured Output) theo thời gian thực.
+* **Connection Pooling & Data Governance (`db_connection.py`, `init_quiz_db.py`):**  
+  Quản trị vòng đời kết nối tập trung qua SQLAlchemy Engine Pooling, tối ưu hóa thông lượng (Throughput) và cách ly tải trọng cơ sở dữ liệu MySQL.
+* **Media Delivery Pipeline & Data Visualization (`*.html`):**  
+  Đồng bộ hóa metadata bài hát và đường dẫn media đám mây (Cloudinary CDN), phân phối qua cơ chế xáo bài tập trung (In-memory Deck Shuffle) đảm bảo tính ngẫu nhiên và độ trễ thấp (Low-Latency UI Delivery).
 
 ---
 
 ### 2. Tech Stack
 
-* **Backend:** Python 3.10+, FastAPI, Uvicorn, Pydantic v2
-* **Database & ORM:** MySQL, SQLAlchemy (Engine & Session Pooling), PyMySQL
+* **Backend Framework:** Python 3.10+, FastAPI, Uvicorn, Pydantic v2
+* **Database & Drivers:** MySQL, SQLAlchemy 2.0 (Connection Pooling), PyMySQL, mysql-connector-python
 * **AI & LLM Services:** Google GenAI SDK (`google-genai`)
 * **Storage & CDN:** Cloudinary CDN
 * **Networking & Tunneling:** ngrok (Public Ingress Tunneling), HTTPX, Requests
@@ -36,7 +38,7 @@ Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu c�
 ├── quiz_scoring.py         # Thuật toán tính điểm & phân loại User Persona
 ├── quiz_metadata.py        # Metadata schemas, cấu hình luật chấm và archetype
 ├── init_quiz_db.py         # Data Definition Script (DDL) khởi tạo schema DB
-├── main.py                 # FastAPI Application Entrypoint & RESTful Routing
+├── main.py                 # FastAPI Application, Background Worker & REST Endpoints
 ├── requirements.txt        # Danh mục quản lý thư viện phụ thuộc (Dependencies)
 └── *.html                  # Giao diện trực quan hóa dữ liệu (Wrapped Story UI)
 ```
