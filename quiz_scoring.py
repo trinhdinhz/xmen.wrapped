@@ -1,4 +1,4 @@
-# /Users/anhnt/Documents/pythoncode/warp/quiz_scoring.py
+# quiz_scoring.py
 from typing import Dict, Any, Tuple
 from quiz_metadata import QUIZ_QUESTIONS_MAP, ARCHETYPES_INFO
 
