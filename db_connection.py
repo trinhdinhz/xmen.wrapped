@@ -16,7 +16,6 @@ DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
 DB_PORT = os.getenv('DB_PORT', '3306')
 DB_NAME = os.getenv('DB_NAME', 'xmen_wrapped')
 
-# Mã hóa mật khẩu tránh lỗi ký tự đặc biệt
 safe_password = quote_plus(DB_PASS)
 
 ENGINE_OPTIONS = {
@@ -27,7 +26,6 @@ ENGINE_OPTIONS = {
 }
 
 _engines = {}
-
 def get_engine(db_name=None):
     """
     Tạo hoặc tái sử dụng engine kết nối.
