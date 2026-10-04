@@ -27,12 +27,6 @@ ENGINE_OPTIONS = {
 
 _engines = {}
 def get_engine(db_name=None):
-    """
-    Tạo hoặc tái sử dụng engine kết nối.
-    - Nếu truyền db_name: Kết nối đích danh database đó.
-    - Nếu db_name='': Kết nối tới MySQL Server không gắn liền với database nào (dùng để tạo DB mới).
-    - Nếu không truyền gì: Kết nối tới DB mặc định trong .env.
-    """
     target_db = DB_NAME if db_name is None else db_name
     
     if target_db not in _engines:
@@ -47,10 +41,10 @@ def test_connection():
         engine = get_engine(db_name='')
         with engine.connect() as conn:
             result = conn.execute(text("SELECT VERSION(), NOW();")).fetchone()
-            print(f"[+] Kết nối MySQL thành công! Phiên bản: {result[0]} | Giờ server: {result[1]}")
+            print(f"[+] MySQL connection successful! Version: {result[0]} | Server time: {result[1]}")
             return True
     except Exception as e:
-        print(f"[!] Lỗi kết nối MySQL: {e}")
+        print(f"[!] Failed to connect to MySQL: {e}")
         return False
 
 if __name__ == '__main__':
