@@ -1,4 +1,4 @@
-# /Users/anhnt/Documents/pythoncode/warp/quiz_metadata.py
+# quiz_metadata.py
 
 
 QUIZ_QUESTIONS_MAP = {
