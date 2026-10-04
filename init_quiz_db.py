@@ -51,18 +51,21 @@ CREATE TABLE IF NOT EXISTS xmen_wrapped.tracks (
 SEED_TRACKS_SQL = """
 INSERT INTO xmen_wrapped.tracks (id, title, artist, artist_portrait_url, cover_url, cut_url, full_url)
 VALUES 
-(1, 'Thủ Đô Cypher', 'RPT MCK, Orijinn, Wxrdie', 
- 'https://res.cloudinary.com/kjby7u78/image/upload/v1790025881/staytonighta.jpg', 
- 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027331/discoveryb.jpg', 
- '/audio/track_1_cut.mp3', '/audio/track_1_full.mp3'),
-(2, 'Chìm Sâu', 'RPT MCK (feat. Trung Trần)', 
- 'https://res.cloudinary.com/kjby7u78/image/upload/v1790026521/discoverya.jpg', 
- 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027332/monsterb.jpg', 
- '/audio/track_2_cut.mp3', '/audio/track_2_full.mp3'),
-(3, 'Tại Vì Sao', 'RPT MCK', 
- 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027332/staytonightb.jpg', 
- 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027331/discoveryb.jpg', 
- '/audio/track_3_cut.mp3', '/audio/track_3_full.mp3')
+(1, 'Crawl Outta Love', 'ILLENIUM feat. Annika Wells', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027592/crawlouttalovea.jpg', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790027331/crawlouttaloveb.jpg', 
+ 'https://res.cloudinary.com/kjby7u78/video/upload/v1790017614/crawlouttalovecut.mp3',
+ 'https://res.cloudinary.com/kjby7u78/video/upload/v1790017615/crawlouttalovefull.mp3'),
+(2, 'Crash', 'Jason Ross & Lin Was Here', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790110647/crasha.jpg', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790110648/crashb.jpg', 
+ 'https://res.cloudinary.com/kjby7u78/video/upload/v1790110643/crashcut.mp3',
+ 'https://res.cloudinary.com/kjby7u78/video/upload/v1790110643/crashfull.mp3'),
+(3, 'Lost With You', 'Far Out feat. Ruby Chase', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790110066/lostwithyoua.jpg', 
+ 'https://res.cloudinary.com/kjby7u78/image/upload/v1790110020/lostwithyoub.jpg', 
+ 'https://res.cloudinary.com/kjby7u78/video/upload/v1790110008/lostwithyoucut.mp3', 
+ 'https://res.cloudinary.com/kjby7u78/video/upload/v1790110009/lostwithyoufull.mp3')
 ON DUPLICATE KEY UPDATE title=VALUES(title);
 """
 
