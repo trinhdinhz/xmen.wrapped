@@ -32,13 +32,7 @@ CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
     sys.path.append(str(CURRENT_DIR))
 
-SHARED_CONFIG_PATH = CURRENT_DIR.parent / 'shared_config'
-if not SHARED_CONFIG_PATH.exists():
-    SHARED_CONFIG_PATH = Path.home() / 'Documents/pythoncode/shared_config'
-if str(SHARED_CONFIG_PATH) not in sys.path:
-    sys.path.append(str(SHARED_CONFIG_PATH))
-
-from db_connection import get_engine  # Sandbox connection
+from db_connection import get_engine
 from quiz_metadata import QUIZ_QUESTIONS_MAP, ARCHETYPES_INFO
 from quiz_scoring import calculate_quiz_results
 from gemini_quiz_engine import generate_deep_wrapped_payload
@@ -58,10 +52,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-audio_dir = CURRENT_DIR / "audio"
-if audio_dir.exists():
-    app.mount("/audio", StaticFiles(directory=str(audio_dir)), name="audio")
-
 # 3. Schema Pydantic
 class QuizSubmission(BaseModel):
     session_id: str = Field(..., description="ID phiên làm bài được cấp từ đầu")
@@ -80,7 +70,7 @@ active_threads_lock = threading.Lock()
 def process_single_quiz_job(session_id: str, scoring_result: Dict[str, Any], track_id: Optional[int]):
     """Luồng worker riêng biệt gọi AI và ghi đè kết quả vào MySQL"""
     global active_llm_threads
-    engine = get_engine('sandbox')
+    engine = get_engine('xmen_wrapped')
     try:
         # Lấy thông tin bài hát tương ứng
         assigned_track = None
@@ -98,7 +88,7 @@ def process_single_quiz_job(session_id: str, scoring_result: Dict[str, Any], tra
 
         # Cập nhật kết quả COMPLETED vào DB
         update_sql = """
-            UPDATE xmen_quiz_records 
+            UPDATE xmen_quiz_records
             SET llm_payload = :llm_payload, status = 'COMPLETED'
             WHERE session_id = :session_id
         """
@@ -118,7 +108,7 @@ def process_single_quiz_job(session_id: str, scoring_result: Dict[str, Any], tra
 def queue_worker_loop():
     """Vòng lặp nền quét bản ghi PENDING và điều phối tối đa 10 request đồng thời"""
     global active_llm_threads
-    engine = get_engine('sandbox')
+    engine = get_engine('xmen_wrapped')
     while True:
         try:
             with active_threads_lock:
@@ -127,10 +117,10 @@ def queue_worker_loop():
             if available_slots > 0:
                 with engine.connect() as conn:
                     select_sql = text("""
-                        SELECT session_id, scoring_data 
-                        FROM xmen_quiz_records 
-                        WHERE status = 'PENDING' 
-                        ORDER BY id ASC 
+                        SELECT session_id, scoring_data
+                        FROM xmen_quiz_records
+                        WHERE status = 'PENDING'
+                        ORDER BY id ASC
                         LIMIT :limit_slots
                     """)
                     pending_records = conn.execute(select_sql, {"limit_slots": available_slots}).mappings().fetchall()
@@ -194,11 +184,11 @@ def serve_test_discount():
 
 @app.get("/api/quiz/init-session")
 def init_quiz_session():
-    engine = get_engine('sandbox')
+    engine = get_engine('xmen_wrapped')
     try:
         with engine.connect() as conn:
             query = text("""
-                SELECT id, title, artist, artist_portrait_url, cover_url, cut_url, full_url 
+                SELECT id, title, artist, artist_portrait_url, cover_url, cut_url, full_url
                 FROM tracks ORDER BY id ASC
             """)
             all_tracks = [dict(r) for r in conn.execute(query).mappings().fetchall()]
@@ -214,7 +204,7 @@ def init_quiz_session():
 
 @app.get("/api/tracks")
 def get_tracks():
-    engine = get_engine('sandbox')
+    engine = get_engine('xmen_wrapped')
     try:
         with engine.connect() as conn:
             rows = conn.execute(text("SELECT id, title, artist, artist_portrait_url, cover_url, cut_url, full_url FROM tracks")).mappings().fetchall()
@@ -239,7 +229,7 @@ def get_questions():
 @app.post("/api/quiz/submit")
 def submit_quiz(payload: QuizSubmission):
     try:
-        engine = get_engine('sandbox')
+        engine = get_engine('xmen_wrapped')
 
         # 1. Tính toán điểm số định lượng
         scoring_result = calculate_quiz_results(payload.user_age, payload.answers)
@@ -306,7 +296,7 @@ def get_quiz_result(session_id: str):
     WHERE session_id = :session_id
     LIMIT 1;
     """
-    engine = get_engine('sandbox')
+    engine = get_engine('xmen_wrapped')
     with engine.connect() as conn:
         row = conn.execute(text(query_sql), {"session_id": session_id}).mappings().fetchone()
         
