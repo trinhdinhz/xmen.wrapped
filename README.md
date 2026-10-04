@@ -1,21 +1,21 @@
 # X-Men Wrapped Engine
 
-Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu cá nhân hóa (Personalized Data Storytelling & Archetype Profiling), xây dựng trên kiến trúc bất đồng bộ (Async Backend) tích hợp LLM và kho lưu trữ đa phương tiện tối ưu hóa CDN.
+A personalized data storytelling and archetype profiling system built on an asynchronous backend architecture integrated with LLMs and CDN-optimized multimedia storage.
 
 ---
 
-### 1. Tính năng cốt lõi & Tư duy Kiến trúc (Key Engineering Highlights)
+### 1. Key Engineering Highlights
 
 * **Behavioral Archetype & Scoring Engine (`quiz_scoring.py`, `quiz_metadata.py`):**  
-  Thuật toán định lượng phản hồi hành vi, tính toán trọng số tương tác đa chiều và định danh chân dung người dùng (User Persona Clustering) phục vụ chiến dịch cá nhân hóa nội dung số.
+  Multi-dimensional behavioral response analysis and weighted scoring algorithms for user persona clustering, powering hyper-personalized digital content campaigns.
 * **Asynchronous Background Task & Concurrency Throttling (`main.py`):**  
-  Kiến trúc xử lý nền (Producer-Consumer via Threading) tách rời luồng ghi nhận HTTP Request và luồng sinh nội dung LLM. Triển khai cơ chế giới hạn tải đồng thời (`MAX_CONCURRENT_LLM = 10`) với Thread Lock nhằm kiểm soát trần tài nguyên và ngăn ngừa cạn kiệt Connection Pool.
+  Decoupled HTTP request ingestion from LLM generation workloads via a multi-threaded producer-consumer pattern. Enforces strict concurrency limits (`MAX_CONCURRENT_LLM = 10`) with thread locking to regulate resource ceilings and prevent database connection pool exhaustion.
 * **LLM Integration & Dynamic Content (`gemini_quiz_engine.py`, `gemini_client.py`):**  
-  Wrapper chuẩn hóa tương tác với Google GenAI SDK, tối ưu hóa Prompt Engineering để sinh dữ liệu JSON có cấu trúc (Structured Output) theo thời gian thực.
+  Standardized wrapper integrating the Google GenAI SDK, leveraging structured prompt engineering to generate deterministic, real-time JSON payloads.
 * **Connection Pooling & Data Governance (`db_connection.py`, `init_quiz_db.py`):**  
-  Quản trị vòng đời kết nối tập trung qua SQLAlchemy Engine Pooling, tối ưu hóa thông lượng (Throughput) và cách ly tải trọng cơ sở dữ liệu MySQL.
+  Centralized connection lifecycle management powered by SQLAlchemy Engine Pooling, optimizing query throughput and isolating MySQL workloads.
 * **Media Delivery Pipeline & Data Visualization (`*.html`):**  
-  Đồng bộ hóa metadata bài hát và đường dẫn media đám mây (Cloudinary CDN), phân phối qua cơ chế xáo bài tập trung (In-memory Deck Shuffle) đảm bảo tính ngẫu nhiên và độ trễ thấp (Low-Latency UI Delivery).
+  Synchronized audio-visual metadata delivered via Cloudinary CDN, backed by an in-memory deck shuffle algorithm ensuring balanced, low-latency client-side content delivery.
 
 ---
 
@@ -29,31 +29,31 @@ Hệ thống tổng hợp hành vi người dùng và phân tích dữ liệu c�
 
 ---
 
-### 3. Cấu Trúc Repository
+### 3. Repository Structure
 
 ```text
-├── db_connection.py        # Quản trị Pool kết nối MySQL & SQLAlchemy Session
-├── gemini_client.py        # Client Wrapper cấu hình Google GenAI SDK
-├── gemini_quiz_engine.py   # Engine xử lý logic sinh nội dung & Dynamic Prompts
-├── quiz_scoring.py         # Thuật toán tính điểm & phân loại User Persona
-├── quiz_metadata.py        # Metadata schemas, cấu hình luật chấm và archetype
-├── init_quiz_db.py         # Data Definition Script (DDL) khởi tạo schema DB
-├── main.py                 # FastAPI Application, Background Worker & REST Endpoints
-├── requirements.txt        # Danh mục quản lý thư viện phụ thuộc (Dependencies)
-└── *.html                  # Giao diện trực quan hóa dữ liệu (Wrapped Story UI)
+├── db_connection.py        # MySQL connection pooling & SQLAlchemy session management
+├── gemini_client.py        # Google GenAI SDK client wrapper & configuration
+├── gemini_quiz_engine.py   # Dynamic prompt generation & structured output parser
+├── quiz_scoring.py         # Multi-axis scoring algorithm & persona clustering
+├── quiz_metadata.py        # Quiz schemas, scoring rubrics & archetype definitions
+├── init_quiz_db.py         # Data Definition Script (DDL) for database initialization
+├── main.py                 # FastAPI entry point, background workers & REST endpoints
+├── requirements.txt        # Project dependencies
+└── *.html                  # Wrapped Story visualization interface
 ```
 
 ---
 
-### 4. Cài đặt & Triển khai (Quickstart)
+### 4. Quickstart & Deployment
 
-#### a. Khởi tạo môi trường & Cài đặt phụ thuộc:
+#### a. Environment Setup & Dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-#### b. Cấu hình môi trường (.env):
+#### b. Environment Variables (.env):
 
 ```env
 DB_HOST=localhost
@@ -64,18 +64,18 @@ DB_NAME=wrapped_db
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-#### c. Khởi tạo Database Schema:
+#### c. Initialize Database Schema:
 
 ```bash
 python init_quiz_db.py
 ```
 
-#### d. Khởi chạy máy chủ API:
+#### d. Launch API Server:
 
 ```bash
-# Terminal 1: Chạy API Server
+# Terminal 1: Start API Server
 uvicorn main:app --reload
 
-# Terminal 2: Mở tunnel truy cập public
+# Terminal 2: Expose Public Ingress Tunnel
 ngrok http 8000
 ```
