@@ -66,7 +66,13 @@ VALUES
  'https://res.cloudinary.com/kjby7u78/image/upload/v1790110020/lostwithyoub.jpg', 
  'https://res.cloudinary.com/kjby7u78/video/upload/v1790110008/lostwithyoucut.mp3', 
  'https://res.cloudinary.com/kjby7u78/video/upload/v1790110009/lostwithyoufull.mp3')
-ON DUPLICATE KEY UPDATE title=VALUES(title);
+ON DUPLICATE KEY UPDATE 
+    title = VALUES(title),
+    artist = VALUES(artist),
+    artist_portrait_url = VALUES(artist_portrait_url),
+    cover_url = VALUES(cover_url),
+    cut_url = VALUES(cut_url),
+    full_url = VALUES(full_url);
 """
 
 def init_all_database():
