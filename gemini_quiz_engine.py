@@ -1,5 +1,6 @@
 # gemini_quiz_engine.py
 import json
+import logging
 import sys
 import threading
 from pathlib import Path
@@ -8,14 +9,21 @@ from typing import Dict, Any
 from gemini_client import get_genai_client  # type: ignore
 from quiz_metadata import QUIZ_QUESTIONS_MAP  # type: ignore
 
+# Configure module logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("QUIZ_ENGINE")
+
+# Concurrency throttle for LLM requests
 GEMINI_SEMAPHORE = threading.BoundedSemaphore(10)
 
+
 def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
+    """Extract and format raw user answers and quantitative metrics into a prompt case file."""
     ans = quiz_result.get("raw_answers", {})
     dims = quiz_result.get("dimensions", {})
     arch = quiz_result.get("archetype", {})
 
-    # 1. Bóc tách câu trả lời thực tế
+    # 1. Parse raw option labels
     q1_val = QUIZ_QUESTIONS_MAP.get("Q1", {}).get("options", {}).get(ans.get("Q1", "A"), {}).get("label", "")
     q2_val = QUIZ_QUESTIONS_MAP.get("Q2", {}).get("options", {}).get(ans.get("Q2", "A"), {}).get("label", "")
     q3_val = QUIZ_QUESTIONS_MAP.get("Q3", {}).get("options", {}).get(ans.get("Q3", "A"), {}).get("label", "")
@@ -24,7 +32,7 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
     q6_val = QUIZ_QUESTIONS_MAP.get("Q6", {}).get("options", {}).get(ans.get("Q6", "A"), {}).get("label", "")
     q7_val = QUIZ_QUESTIONS_MAP.get("Q7", {}).get("options", {}).get(ans.get("Q7", "A"), {}).get("label", "")
 
-    # 2. Bóc tách sẵn 4 trục dữ liệu định lượng ra biến riêng (Không để lồng trong f-string)
+    # 2. Extract quantitative dimension metrics
     root_exp_level = dims.get("root_exposure", {}).get("level", "Moderate")
     scalp_profile = dims.get("current_condition", {}).get("scalp_profile", "Moderate Oil")
     
@@ -55,7 +63,9 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
 - Tỷ lệ che đậy hương thơm: {fragrance_masking_str}
 '''
 
+
 def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate dynamic Spotify-Wrapped story payload via Gemini AI with immediate fallback."""
     client = get_genai_client()
     user_case_file = build_xmen_case_file(quiz_result)
     arch = quiz_result.get("archetype", {})
@@ -118,68 +128,24 @@ CHỈ TRẢ VỀ JSON THUẦN (KHÔNG MARKDOWN, KHÔNG ```json):
 }}
 '''
 
-    with GEMINI_SEMAPHORE:
-        # Sử dụng model flash trực tiếp, không truyền schema phức tạp để tránh AFC warning và độ trễ
-        for model_name in ["gemini-2.5-flash", "gemini-1.5-flash"]:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt,
-                    config={
-                        "response_mime_type": "application/json",
-                        "temperature": 0.6,
-                        "max_output_tokens": 800
-                    }
-                )
-                if response and response.text:
-                    cleaned_text = response.text.strip()
-                    if cleaned_text.startswith("```json"):
-                        cleaned_text = cleaned_text[7:]
-                    if cleaned_text.startswith("```"):
-                        cleaned_text = cleaned_text[3:]
-                    if cleaned_text.endswith("```"):
-                        cleaned_text = cleaned_text[:-3]
-                    return json.loads(cleaned_text.strip())
-            except Exception as e:
-                print(f"[!] Model {model_name} lỗi: {e}")
-                continue
-
-    # Fallback tức thì nếu Gemini quá tải/timeout
-    return {
-        "persona_title": arch.get("title", "THE ROUTINE MAN"),
-        "tagline": arch.get("subtitle", "Hiểu cơ thể để nâng tầm bản lĩnh."),
-        "grooming_iq": quiz_result.get("grooming_iq", 65),
-        "authentic_man_pct": quiz_result.get("authentic_man_pct", 60),
-        "slides": {
-            "slide_1_age_shock": {
-                "headline": f"Tuổi chân tóc: {quiz_result.get('hair_stress_age', 26)}",
-                "body": f"Áp lực môi trường đang khiến nang tóc bạn già hơn tuổi thật {quiz_result.get('delta_age', 2)} năm."
-            },
-            "slide_2_exposure_condition": {
-                "headline": "Môi trường thử thách",
-                "body": "Khói bụi và thói quen sinh hoạt hàng ngày tạo áp lực liên tục lên nang tóc mà bạn không để ý."
-            },
-            "slide_3_grooming_gap": {
-                "headline": "Khoảng cách trong thói quen",
-                "body": "Có sự chênh lệch giữa tiêu chuẩn bạn mong muốn và hành động thực tế trong phòng tắm.",
-                "bad_habits": [
-                    "Lười che chắn khói bụi" if is_low_helmet else "Đội mũ bảo hiểm lâu",
-                    "Dùng dầu gội tiện tay"
-                ],
-                "scalp_impacts": [
-                    "Tích tụ bã nhờn nang tóc",
-                    "Bết dầu nhanh sau 4h"
-                ],
-                "gap_desc": "Khoảng cách giữa tiêu chuẩn lý tưởng và hành vi tiện tay."
-            },
-            "slide_4_final_card": {
-                "archetype_title": arch.get("title", "THE ROUTINE MAN"),
-                "subtitle": arch.get("subtitle", "Biết chăm nhưng chưa hiểu sâu"),
-                "quote": arch.get("quote", "Bản lĩnh nằm ở việc hiểu rõ cơ thể mình."),
-                "strength": arch.get("strength", "Chăm sóc đều đặn mỗi ngày."),
-                "blind_spot": arch.get("blind_spot", "Tiện đâu xài đó."),
-                "golden_advice": "Đầu tư giải pháp chuyên sâu làm sạch nang tóc.",
-                "product_route": arch.get("product_route", "routine_optimize")
-            }
-        }
-    }
+    if client:
+        with GEMINI_SEMAPHORE:
+            # Query fast Flash models sequentially with fallback
+            for model_name in ["gemini-2.5-flash", "gemini-1.5-flash"]:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config={
+                            "response_mime_type": "application/json",
+                            "temperature": 0.6,
+                            "max_output_tokens": 800,
+                        },
+                    )
+                    if response and response.text:
+                        cleaned_text = response.text.strip()
+                        if cleaned_text.startswith("```json"):
+                            cleaned_text = cleaned_text[7:]
+                        if cleaned_text.startswith("```"):
+                            cleaned_text = cleaned_text[3:]
+                        if cleaned_text.endswith("
