@@ -15,8 +15,6 @@ logger = logging.getLogger("QUIZ_ENGINE")
 
 GEMINI_SEMAPHORE = threading.BoundedSemaphore(10)
 
-
-# 1. Định nghĩa Schema chặt chẽ để Google GenAI ép chuẩn cấu trúc JSON
 class Slide1(BaseModel):
     headline: str
     body: str
@@ -127,7 +125,6 @@ def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]
 
     if client:
         with GEMINI_SEMAPHORE:
-            # gemini-3.6-flash đã thông 200 OK, thêm fallback 3.8 nếu 3.8 hết nghẽn
             for model_name in ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"]:
                 try:
                     response = client.models.generate_content(
@@ -136,12 +133,11 @@ def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]
                         config={
                             "response_mime_type": "application/json",
                             "temperature": 0.4,
-                            # BỎ HẲN max_output_tokens để tránh bị ngắt cụt chuỗi JSON ở ký tự 160
                         },
                     )
                     if response and response.text:
                         raw_text = response.text.strip()
-                        # Làm sạch nếu có markdown codeblock
+                        
                         if raw_text.startswith("```json"):
                             raw_text = raw_text[7:]
                         elif raw_text.startswith("```"):
