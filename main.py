@@ -13,12 +13,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 
-# 0. Bộ chia bài Deck Shuffle 12 track tập trung
+# 0. Centralized Deck Shuffle dealer for track selection
 track_deck_lock = threading.Lock()
 server_track_deck = []
 
 def assign_unique_track(track_list):
-    """Rút 1 bài hát từ bộ bài tập trung. Hết bài tự xáo lại bộ mới."""
+    """Draw a track from the centralized deck. Reshuffle automatically when depleted."""
     global server_track_deck
     with track_deck_lock:
         if not server_track_deck or any(idx >= len(track_list) for idx in server_track_deck):
@@ -27,7 +27,7 @@ def assign_unique_track(track_list):
         chosen_idx = server_track_deck.pop()
         return track_list[chosen_idx]
 
-# 1. Cấu hình đường dẫn hệ thống
+# 1. System path resolution configuration
 CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
     sys.path.append(str(CURRENT_DIR))
@@ -37,10 +37,10 @@ from quiz_metadata import QUIZ_QUESTIONS_MAP, ARCHETYPES_INFO
 from quiz_scoring import calculate_quiz_results
 from gemini_quiz_engine import generate_deep_wrapped_payload
 
-# 2. Khởi tạo ứng dụng FastAPI
+# 2. FastAPI application initialization
 app = FastAPI(
     title="X-Men Wrapped API (Marketing Edition)",
-    description="Backend API đo chỉ số bản lĩnh và tạo Story Spotify Wrapped",
+    description="Backend API calculating resilience metrics and generating Spotify Wrapped style stories",
     version="1.5.0"
 )
 
@@ -52,27 +52,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 3. Schema Pydantic
+# 3. Pydantic Request Schemas
 class QuizSubmission(BaseModel):
-    session_id: str = Field(..., description="ID phiên làm bài được cấp từ đầu")
-    track_id: Optional[int] = Field(None, description="ID bài hát đã được bốc thăm từ đầu")
+    session_id: str = Field(..., description="Unique quiz session identifier issued at initialization")
+    track_id: Optional[int] = Field(None, description="Pre-assigned audio track ID from initialization")
     user_name: str = Field(default="Chiến thần Deadline", max_length=50)
     user_age: int = Field(..., ge=1, le=250)
-    answers: Dict[str, str] = Field(..., description="Đáp án Q1 -> Q7")
+    answers: Dict[str, str] = Field(..., description="Mapping of question IDs to selected option keys (Q1 -> Q7)")
 
 # ==============================================================================
-# HÀNG ĐỢI XỬ LÝ NỀN (BACKGROUND TASK QUEUE WORKER)
+# BACKGROUND TASK QUEUE WORKER
 # ==============================================================================
 MAX_CONCURRENT_LLM = 10
 active_llm_threads = 0
 active_threads_lock = threading.Lock()
 
 def process_single_quiz_job(session_id: str, scoring_result: Dict[str, Any], track_id: Optional[int]):
-    """Luồng worker riêng biệt gọi AI và ghi đè kết quả vào MySQL"""
+    """Isolated worker thread invoking LLM engine and persisting results to MySQL."""
     global active_llm_threads
     engine = get_engine('xmen_wrapped')
     try:
-        # Lấy thông tin bài hát tương ứng
+        # Retrieve associated audio track metadata
         assigned_track = None
         if track_id:
             with engine.connect() as conn:
@@ -81,12 +81,12 @@ def process_single_quiz_job(session_id: str, scoring_result: Dict[str, Any], tra
                 if row_t:
                     assigned_track = dict(row_t)
 
-        # Chạy Gemini Engine
+        # Execute Gemini LLM Generation Engine
         llm_payload = generate_deep_wrapped_payload(scoring_result)
         if assigned_track:
             llm_payload["assigned_track"] = assigned_track
 
-        # Cập nhật kết quả COMPLETED vào DB
+        # Commit completed payload and update status to MySQL
         update_sql = """
             UPDATE xmen_quiz_records
             SET llm_payload = :llm_payload, status = 'COMPLETED'
@@ -98,7 +98,7 @@ def process_single_quiz_job(session_id: str, scoring_result: Dict[str, Any], tra
                 "session_id": session_id
             })
     except Exception as ex:
-        print(f"[!] Worker lỗi tại session {session_id}: {ex}")
+        print(f"[!] Worker exception at session {session_id}: {ex}")
         with engine.begin() as conn:
             conn.execute(text("UPDATE xmen_quiz_records SET status = 'FAILED' WHERE session_id = :s_id"), {"s_id": session_id})
     finally:
@@ -106,7 +106,7 @@ def process_single_quiz_job(session_id: str, scoring_result: Dict[str, Any], tra
             active_llm_threads -= 1
 
 def queue_worker_loop():
-    """Vòng lặp nền quét bản ghi PENDING và điều phối tối đa 10 request đồng thời"""
+    """Background poll loop scanning PENDING records and throttling up to 10 concurrent requests."""
     global active_llm_threads
     engine = get_engine('xmen_wrapped')
     while True:
@@ -140,15 +140,15 @@ def queue_worker_loop():
                     t.start()
 
         except Exception as e:
-            print(f"[!] Lỗi hàng đợi worker: {e}")
+            print(f"[!] Worker queue dispatch error: {e}")
 
         time.sleep(0.5)
 
-# Bật luồng worker chạy ngầm khi khởi động server
+# Initialize background daemon thread on server startup
 threading.Thread(target=queue_worker_loop, daemon=True).start()
 
 # ==============================================================================
-# ENDPOINTS
+# HTTP ROUTE ENDPOINTS
 # ==============================================================================
 @app.get("/")
 def root():
@@ -160,7 +160,7 @@ def serve_quiz():
     quiz_file = CURRENT_DIR / "quiz.html"
     if quiz_file.exists():
         return FileResponse(quiz_file)
-    raise HTTPException(status_code=404, detail="Chưa tìm thấy file quiz.html")
+    raise HTTPException(status_code=404, detail="File quiz.html not found.")
 
 @app.get("/index.html")
 def serve_index():
@@ -172,15 +172,15 @@ def get_wrapped_page():
     index2_file = CURRENT_DIR / "index2.html"
     if index2_file.exists():
         return FileResponse(index2_file)
-    raise HTTPException(status_code=404, detail="Chưa tìm thấy file index2.html")
+    raise HTTPException(status_code=404, detail="File index2.html not found.")
 
 @app.get("/test_discount.html")
 def serve_test_discount():
-    """Phục vụ trang hiển thị Discount Voucher 50%"""
+    """Serve promotional 50% discount voucher page."""
     discount_file = CURRENT_DIR / "test_discount.html"
     if discount_file.exists():
         return FileResponse(discount_file)
-    raise HTTPException(status_code=404, detail="Chưa tìm thấy file test_discount.html")
+    raise HTTPException(status_code=404, detail="File test_discount.html not found.")
 
 @app.get("/api/quiz/init-session")
 def init_quiz_session():
@@ -194,13 +194,13 @@ def init_quiz_session():
             all_tracks = [dict(r) for r in conn.execute(query).mappings().fetchall()]
 
         if not all_tracks:
-            raise HTTPException(status_code=404, detail="Bảng tracks chưa có dữ liệu bài hát.")
+            raise HTTPException(status_code=404, detail="No track records found in database.")
 
         assigned_track = assign_unique_track(all_tracks)
         session_id = f"xmen_{uuid.uuid4().hex[:10]}"
         return {"session_id": session_id, "track": assigned_track}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Lỗi khởi tạo session: {e}")
+        raise HTTPException(status_code=500, detail=f"Session initialization failed: {e}")
 
 @app.get("/api/tracks")
 def get_tracks():
@@ -210,7 +210,7 @@ def get_tracks():
             rows = conn.execute(text("SELECT id, title, artist, artist_portrait_url, cover_url, cut_url, full_url FROM tracks")).mappings().fetchall()
             return [dict(row) for row in rows]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Lỗi truy vấn bảng tracks: {e}")
+        raise HTTPException(status_code=500, detail=f"Error querying tracks repository: {e}")
 
 @app.get("/api/quiz/questions")
 def get_questions():
@@ -231,7 +231,7 @@ def submit_quiz(payload: QuizSubmission):
     try:
         engine = get_engine('xmen_wrapped')
 
-        # 1. Tính toán điểm số định lượng
+        # 1. Compute deterministic quantitative scoring metrics
         scoring_result = calculate_quiz_results(payload.user_age, payload.answers)
         scoring_result["user_name"] = payload.user_name
         scoring_result["track_id"] = payload.track_id
@@ -240,7 +240,7 @@ def submit_quiz(payload: QuizSubmission):
         dims = scoring_result.get("dimensions", {})
         arch = scoring_result.get("archetype", {})
 
-        # Lưu llm_payload là '{}' để tương thích chặt chẽ với ràng buộc NOT NULL của MySQL
+        # Default llm_payload to '{}' to ensure strict compatibility with NOT NULL database constraints
         insert_sql = """
         INSERT INTO xmen_quiz_records (
             session_id, user_age, hair_stress_age, delta_age, grooming_iq,
@@ -277,17 +277,17 @@ def submit_quiz(payload: QuizSubmission):
         return {
             "session_id": payload.session_id,
             "status": "PENDING",
-            "message": "Nộp bài thành công, hệ thống đang tổng hợp dữ liệu bản lĩnh."
+            "message": "Submission received successfully; background analytics pipeline initiated."
         }
         
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Lỗi submit_quiz: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Submission processing error: {str(e)}")
 
 @app.get("/api/quiz/result/{session_id}")
 def get_quiz_result(session_id: str):
-    """Frontend gọi polling để lấy kết quả đo lường và payload từ AI"""
+    """Frontend polling endpoint to fetch computed diagnostics and AI-generated narrative payload."""
     query_sql = """
     SELECT session_id, user_age, hair_stress_age, delta_age, grooming_iq,
            archetype_code, archetype_title, scalp_profile, exposure_level,
@@ -301,7 +301,7 @@ def get_quiz_result(session_id: str):
         row = conn.execute(text(query_sql), {"session_id": session_id}).mappings().fetchone()
         
     if not row:
-        raise HTTPException(status_code=404, detail="Không tìm thấy kết quả cho session này.")
+        raise HTTPException(status_code=404, detail="No diagnostic record found for this session.")
 
     scoring_obj = json.loads(row["scoring_data"]) if isinstance(row["scoring_data"], str) else (row["scoring_data"] or {})
     wrapped_obj = json.loads(row["llm_payload"]) if (row["llm_payload"] and isinstance(row["llm_payload"], str)) else {}
