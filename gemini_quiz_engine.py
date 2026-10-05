@@ -128,7 +128,7 @@ def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]
     if client:
         with GEMINI_SEMAPHORE:
             # gemini-3.6-flash đã thông 200 OK, thêm fallback 3.8 nếu 3.8 hết nghẽn
-            for model_name in ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-3.8-flash", "gemini-2.5-pro"]:
+            for model_name in ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"]:
                 try:
                     response = client.models.generate_content(
                         model=model_name,
