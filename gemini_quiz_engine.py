@@ -4,21 +4,58 @@ import logging
 import sys
 import threading
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
+from pydantic import BaseModel
 
 from gemini_client import get_genai_client  # type: ignore
 from quiz_metadata import QUIZ_QUESTIONS_MAP  # type: ignore
 
-# Configure module logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("QUIZ_ENGINE")
 
-# Concurrency throttle for LLM requests
 GEMINI_SEMAPHORE = threading.BoundedSemaphore(10)
 
 
+# 1. Định nghĩa Schema chặt chẽ để Google GenAI ép chuẩn cấu trúc JSON
+class Slide1(BaseModel):
+    headline: str
+    body: str
+
+class Slide2(BaseModel):
+    headline: str
+    body: str
+
+class Slide3(BaseModel):
+    headline: str
+    body: str
+    bad_habits: List[str]
+    scalp_impacts: List[str]
+    gap_desc: str
+
+class Slide4(BaseModel):
+    archetype_title: str
+    subtitle: str
+    quote: str
+    strength: str
+    blind_spot: str
+    golden_advice: str
+    product_route: str
+
+class SlidesPayload(BaseModel):
+    slide_1_age_shock: Slide1
+    slide_2_exposure_condition: Slide2
+    slide_3_grooming_gap: Slide3
+    slide_4_final_card: Slide4
+
+class WrappedResponseSchema(BaseModel):
+    persona_title: str
+    tagline: str
+    grooming_iq: int
+    authentic_man_pct: int
+    slides: SlidesPayload
+
+
 def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
-    """Extract and format raw user answers and quantitative metrics into a prompt case file."""
     ans = quiz_result.get("raw_answers", {})
     dims = quiz_result.get("dimensions", {})
     arch = quiz_result.get("archetype", {})
@@ -64,101 +101,59 @@ def build_xmen_case_file(quiz_result: Dict[str, Any]) -> str:
 
 
 def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]:
-    """Generate dynamic Spotify-Wrapped story payload via Gemini AI with immediate fallback."""
     client = get_genai_client()
     user_case_file = build_xmen_case_file(quiz_result)
     arch = quiz_result.get("archetype", {})
     arch_title = arch.get("title", "THE ROUTINE MAN")
-    hair_stress_age = quiz_result.get("hair_stress_age", 26)
-    grooming_iq = quiz_result.get("grooming_iq", 65)
-    authentic_man_pct = quiz_result.get("authentic_man_pct", 60)
-    product_route = arch.get("product_route", "routine_optimize")
 
-    schema_example = {
-        "persona_title": arch_title,
-        "tagline": "Một câu châm ngôn ngắn sắc lẹm dưới 12 từ",
-        "grooming_iq": grooming_iq,
-        "authentic_man_pct": authentic_man_pct,
-        "slides": {
-            "slide_1_age_shock": {
-                "headline": f"Tuổi chân tóc: {hair_stress_age}",
-                "body": "Áp lực môi trường làm nang tóc già trước tuổi."
-            },
-            "slide_2_exposure_condition": {
-                "headline": "Môi trường thử thách",
-                "body": "Đoạn 2 câu mô tả áp lực bụi bẩn và dầu nhờn ảnh hưởng nang tóc."
-            },
-            "slide_3_grooming_gap": {
-                "headline": "The Grooming Gap",
-                "body": "Bóc trần sự lệch pha giữa tiêu chuẩn lý tưởng và thực tế trong phòng tắm.",
-                "bad_habits": ["Ý 1 ngắn", "Ý 2 ngắn"],
-                "scalp_impacts": ["Tác động 1", "Tác động 2"],
-                "gap_desc": "Khoảng cách giữa tiêu chuẩn lý tưởng và hành vi tiện tay."
-            },
-            "slide_4_final_card": {
-                "archetype_title": arch_title,
-                "subtitle": "Slogan phụ ngắn dí dỏm",
-                "quote": "Châm ngôn súc tích về bản lĩnh chăm sóc tóc",
-                "strength": "Điểm mạnh nổi bật nhất.",
-                "blind_spot": "Điểm mù cần khắc phục.",
-                "golden_advice": "Lời khuyên đắt giá giải quyết vấn đề từ gốc.",
-                "product_route": product_route
-            }
-        }
-    }
-
-    instructions = [
-        "Bạn là Giám đốc Sáng tạo Chiến dịch thương hiệu cho X-Men Wrapped 2026.",
-        "Nhiệm vụ: Phân tích hồ sơ trắc nghiệm bên dưới và sinh JSON Wrapped sắc sảo, nam tính, có chất châm biếm nhẹ, hiện đại chuẩn phong cách Spotify Wrapped.",
-        "",
-        user_case_file,
-        "",
-        "QUY TẮC NỘI DUNG:",
-        "1. ĐỘI MŨ BẢO HIỂM: Nếu Q1 là A, TUYỆT ĐỐI KHÔNG ghi 'Đội mũ bảo hiểm nhiều' vào thói quen xấu. Thay bằng: 'Lười che chắn khói bụi', 'Gội đầu qua loa', hoặc 'Dùng dầu gội tiện tay'.",
-        "2. Chỉ khi Q1 là C hoặc D mới nhắc đến mũ bảo hiểm.",
-        "3. Độ dài cực kỳ nghiêm ngặt để vừa khung Mobile:",
-        "   - bad_habits: Đúng 2 ý, mỗi ý DƯỚI 20 KÝ TỰ.",
-        "   - scalp_impacts: Đúng 2 ý, mỗi ý DƯỚI 20 KÝ TỰ.",
-        "   - subtitle: Dưới 30 ký tự, không dấu chấm cuối.",
-        "   - quote: Dưới 55 ký tự.",
-        "   - strength: Dưới 35 ký tự, có dấu chấm cuối.",
-        "   - blind_spot: Dưới 35 ký tự, có dấu chấm cuối.",
-        "   - golden_advice: Dưới 55 ký tự.",
-        "   - gap_desc: Dưới 35 ký tự.",
-        "   - body ở slide_2_exposure_condition: Từ 80 - 130 ký tự.",
-        "",
-        "CHỈ TRẢ VỀ JSON THUẦN (KHÔNG MARKDOWN, KHÔNG ```json):",
-        json.dumps(schema_example, ensure_ascii=False, indent=2)
-    ]
-    prompt = "\n".join(instructions)
+    prompt = (
+        "Bạn là Giám đốc Sáng tạo Chiến dịch thương hiệu cho X-Men Wrapped 2026.\n"
+        "Nhiệm vụ: Phân tích hồ sơ trắc nghiệm bên dưới và sinh nội dung Wrapped sắc sảo, nam tính, có chất châm biếm nhẹ, hiện đại chuẩn phong cách Spotify Wrapped.\n\n"
+        + user_case_file + "\n\n"
+        "QUY TẮC NỘI DUNG:\n"
+        "1. ĐỘI MŨ BẢO HIỂM: Nếu Q1 là A, TUYỆT ĐỐI KHÔNG ghi 'Đội mũ bảo hiểm nhiều' vào thói quen xấu. Thay bằng: 'Lười che chắn khói bụi', 'Gội đầu qua loa', hoặc 'Dùng dầu gội tiện tay'.\n"
+        "2. Chỉ khi Q1 là C hoặc D mới nhắc đến mũ bảo hiểm.\n"
+        "3. Độ dài cực kỳ nghiêm ngặt để vừa khung Mobile:\n"
+        "   - bad_habits: Đúng 2 ý, mỗi ý DƯỚI 20 KÝ TỰ.\n"
+        "   - scalp_impacts: Đúng 2 ý, mỗi ý DƯỚI 20 KÝ TỰ.\n"
+        "   - subtitle: Dưới 30 ký tự, không dấu chấm cuối.\n"
+        "   - quote: Dưới 55 ký tự.\n"
+        "   - strength: Dưới 35 ký tự, có dấu chấm cuối.\n"
+        "   - blind_spot: Dưới 35 ký tự, có dấu chấm cuối.\n"
+        "   - golden_advice: Dưới 55 ký tự.\n"
+        "   - gap_desc: Dưới 35 ký tự.\n"
+        "   - body ở slide_2_exposure_condition: Từ 80 - 130 ký tự."
+    )
 
     if client:
         with GEMINI_SEMAPHORE:
-            for model_name in ["gemini-2.5-flash", "gemini-1.5-flash"]:
+            # gemini-3.6-flash đã thông 200 OK, thêm fallback 3.8 nếu 3.8 hết nghẽn
+            for model_name in ["gemini-2.5-flash", "gemini-3.6-flash", "gemini-3.8-flash", "gemini-2.5-pro"]:
                 try:
                     response = client.models.generate_content(
                         model=model_name,
                         contents=prompt,
                         config={
                             "response_mime_type": "application/json",
-                            "temperature": 0.6,
-                            "max_output_tokens": 800,
+                            "temperature": 0.4,
+                            # BỎ HẲN max_output_tokens để tránh bị ngắt cụt chuỗi JSON ở ký tự 160
                         },
                     )
                     if response and response.text:
-                        cleaned_text = response.text.strip()
-                        if cleaned_text.startswith("```json"):
-                            cleaned_text = cleaned_text[7:]
-                        elif cleaned_text.startswith("```"):
-                            cleaned_text = cleaned_text[3:]
-                        if cleaned_text.endswith("```"):
-                            cleaned_text = cleaned_text[:-3]
+                        raw_text = response.text.strip()
+                        # Làm sạch nếu có markdown codeblock
+                        if raw_text.startswith("```json"):
+                            raw_text = raw_text[7:]
+                        elif raw_text.startswith("```"):
+                            raw_text = raw_text[3:]
+                        if raw_text.endswith("```"):
+                            raw_text = raw_text[:-3]
+                        raw_text = raw_text.strip()
 
-                        cleaned_text = cleaned_text.strip()
-                        return json.loads(cleaned_text)
+                        return json.loads(raw_text)
 
                 except Exception as ex:
-                    logger.warning("Model %s generation failed: %s. Retrying fallback...", model_name, ex)
+                    logger.warning("Model %s generation failed: %s. Retrying next...", model_name, ex)
                     continue
 
     logger.info("Using deterministic fallback payload for archetype: %s", arch_title)
