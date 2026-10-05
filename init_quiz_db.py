@@ -2,12 +2,12 @@
 from sqlalchemy import text
 from db_connection import get_engine
 
-# 0. TẠO MỚI SCHEMA
+# 0. SCHEMA DEFINITION
 CREATE_SCHEMA = """
 CREATE SCHEMA IF NOT EXISTS xmen_wrapped DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 """
 
-# 1. BẢNG KẾT QUẢ TEST & WRAPPED (Chỉ định rõ xmen_wrapped.)
+# 1. TEST RESULTS & WRAPPED RECORDS TABLE
 CREATE_QUIZ_RECORDS_TABLE = """
 CREATE TABLE IF NOT EXISTS xmen_wrapped.xmen_quiz_records (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS xmen_wrapped.xmen_quiz_records (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 """
 
-# 2. BẢNG TRACKS LƯU DANH SÁCH BÀI HÁT
+# 2. AUDIO TRACKS REPOSITORY TABLE
 CREATE_TRACKS_TABLE = """
 CREATE TABLE IF NOT EXISTS xmen_wrapped.tracks (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS xmen_wrapped.tracks (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 """
 
-# 3. DỮ LIỆU SEED MẪU CHO TRACKS
+# 3. SEED DATA FOR TRACKS
 SEED_TRACKS_SQL = """
 INSERT INTO xmen_wrapped.tracks (id, title, artist, artist_portrait_url, cover_url, cut_url, full_url)
 VALUES 
@@ -76,26 +76,26 @@ ON DUPLICATE KEY UPDATE
 """
 
 def init_all_database():
-    # Bước 1: Mở kết nối cấp máy chủ (chưa cần chỉ định database) để tạo Schema an toàn
+    # Step 1: Establish a server-level connection (without targeting a specific DB) to ensure schema existence
     server_engine = get_engine(db_name='')
     with server_engine.begin() as conn:
         conn.execute(text(CREATE_SCHEMA))
-        print("[+] Đã kiểm tra/khởi tạo Schema `xmen_wrapped`!")
+        print("[+] Schema `xmen_wrapped` verified/initialized successfully!")
 
-    # Bước 2: Kết nối trực tiếp vào xmen_wrapped để tạo bảng và nạp seed data
+    # Step 2: Connect directly to `xmen_wrapped` to initialize tables and populate seed data
     app_engine = get_engine('xmen_wrapped')
     with app_engine.begin() as conn:
-        # Tạo bảng kết quả test
+        # Initialize quiz records table
         conn.execute(text(CREATE_QUIZ_RECORDS_TABLE))
-        print("[+] Đã khởi tạo bảng `xmen_quiz_records`!")
+        print("[+] Table `xmen_quiz_records` initialized successfully!")
 
-        # Tạo bảng tracks
+        # Initialize audio tracks repository table
         conn.execute(text(CREATE_TRACKS_TABLE))
-        print("[+] Đã khởi tạo bảng `tracks`!")
+        print("[+] Table `tracks` initialized successfully!")
 
-        # Nạp dữ liệu seed
+        # Populate initial seed data
         conn.execute(text(SEED_TRACKS_SQL))
-        print("[+] Đã nạp dữ liệu mẫu vào bảng `tracks` thành công!")
+        print("[+] Seed data populated into `tracks` successfully!")
 
 if __name__ == '__main__':
     init_all_database()
