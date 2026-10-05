@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
   <title>X-Men Wrapped 2026 - Hair & Scalp Quiz</title>
 
-  <!-- Google Fonts chuẩn Figma -->
+  <!-- Figma-compliant Google Fonts Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Abel&family=Amita:wght@700&family=Anek+Odia:wght@400;700;800&family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* 1. Khung Story chuẩn 9:16 trên Mobile (380x675) */
+    /* 1. Standard mobile 9:16 Story viewport (380x675) */
     .story-container {
       position: relative;
       width: 100%;
@@ -41,7 +41,7 @@
       border: 1px solid #333333;
     }
 
-    /* ================= TIA SÁNG BO VIỀN MEN THEO GÓC MÀN HÌNH ================= */
+    /* ================= SCREEN CORNER CONTOUR AMBIENT GLOW EFFECT ================= */
     .top-contour-beam {
       position: absolute;
       top: 0;
@@ -103,7 +103,7 @@
       }
     }
 
-    /* 2. Hệ quy chiếu gốc Figma 1080x1920 */
+    /* 2. Native Figma 1080x1920 coordinate reference canvas */
     .figma-world {
       position: absolute;
       width: 1080px;
@@ -113,7 +113,7 @@
       pointer-events: auto;
     }
 
-    /* ================= CÁC SECTION MÀN HÌNH ================= */
+    /* ================= SCREEN SECTION CONTAINERS ================= */
     #entry-section {
       position: absolute;
       inset: 0;
@@ -199,7 +199,7 @@
       transform: scale(0.94);
     }
 
-    /* ================= KHUNG TRƯỢT NỘI DUNG QUIZ ================= */
+    /* ================= QUIZ CONTENT SCROLL / SLIDE VIEWPORT ================= */
     #question-card-wrapper {
       position: absolute;
       inset: 0;
@@ -238,7 +238,7 @@
       to { opacity: 0; transform: translateX(120px); }
     }
 
-    /* ================= ELEMENTS CHỮ & TIÊU ĐỀ QUIZ ================= */
+    /* ================= TYPOGRAPHY & HEADER ELEMENTS ================= */
     .dim-large-title {
       position: absolute;
       width: 733px;
@@ -296,7 +296,7 @@
       z-index: 10;
     }
 
-    /* ================= KHỐI ĐÁP ÁN QUIZ ================= */
+    /* ================= QUIZ OPTION SELECTION CONTAINER ================= */
     .quiz-option-item {
       cursor: pointer;
       z-index: 30;
@@ -363,7 +363,7 @@
       pointer-events: none;
     }
 
-    /* ================= NÚT QUAY LẠI ================= */
+    /* ================= BACK NAVIGATION BUTTON ================= */
     .btn-back-group {
       position: absolute;
       width: 298px;
@@ -506,7 +506,7 @@
 
   <div class="story-container">
 
-    <!-- TIA SÁNG BO VIỀN CONTOUR CHẠY MEN THEO GÓC CẠNH TRÊN MÀN HÌNH -->
+    <!-- CORNER CONTOUR LASER SWEEP RUNNING ALONG TOP BORDERS -->
     <svg class="top-contour-beam" viewBox="0 0 380 70" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="laserGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -523,7 +523,7 @@
 
     <div class="figma-world">
 
-      <!-- ================= 1. MÀN HÌNH ENTRY ONBOARDING ================= -->
+      <!-- ================= 1. ONBOARDING / ENTRY SCREEN ================= -->
       <div id="entry-section">
         <svg width="1080" height="1920" viewBox="0 0 1080 1920" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position: absolute; top: 0; left: 0; pointer-events: none;">
           <rect width="1080" height="1920" fill="#F0F0EB"/>
@@ -671,7 +671,7 @@
         </div>
       </div>
 
-      <!-- ================= 2. MÀN HÌNH BỘ CÂU HỎI QUIZ ================= -->
+      <!-- ================= 2. QUESTIONNAIRE / QUIZ ENGINE VIEW ================= -->
       <div id="quiz-section">
         <svg style="position: absolute; inset: 0; width: 1080px; height: 1920px; pointer-events: none; z-index: 0;" viewBox="0 0 1080 1920" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#clip0_33_653)">
@@ -800,7 +800,7 @@
         </button>
       </div>
 
-      <!-- ================= 3. LỚP PHỦ LOADING CHUNG ================= -->
+      <!-- ================= 3. GLOBAL MODAL LOADING OVERLAY ================= -->
       <div class="loading-overlay active" id="loadingOverlay">
         <div class="rhombus-container">
           <div class="rhombus-outer"></div>
@@ -877,14 +877,14 @@
     subEl.innerText = "Hệ thống đang chuẩn bị tài nguyên và bài hát độc bản...";
 
     try {
-        // Chỉ gọi init-session ĐÚNG MỘT LẦN DUY NHẤT ở đây
+        // IDEMPOTENT: Invoke init-session EXACTLY ONCE here
         const sessRes = await fetch('/api/quiz/init-session');
         if (sessRes.ok) {
         const sessData = await sessRes.json();
         if (sessData.session_id) currentSessionId = sessData.session_id;
         if (sessData.track) {
             assignedTrack = sessData.track;
-            // KHÓA CỨNG MỘT NGUỒN SỰ THẬT DUY NHẤT VÀO LOCALSTORAGE
+            // PERSIST SINGLE SOURCE OF TRUTH (SSOT) TO LOCALSTORAGE
             localStorage.setItem('xmen_assigned_track', JSON.stringify(assignedTrack));
         }
         }
@@ -965,14 +965,14 @@
       const nameInput = document.getElementById('entryNameInput');
       const ageInput = document.getElementById('entryAgeInput');
 
-      // Đọc trực tiếp từ ô input hiện tại
+      // Directly retrieve value from active input node
       const rawName = nameInput ? nameInput.value.trim() : "";
       const rawAge = ageInput ? ageInput.value.trim() : "";
 
       userName = rawName ? rawName : "Chiến thần Deadline";
       userAge = rawAge ? parseInt(rawAge, 10) : 24;
 
-      // Ép lưu trực tiếp vào LocalStorage ngay tại đây
+      // Force-sync state into LocalStorage immediately
       localStorage.setItem('xmen_user_name', userName);
       localStorage.setItem('xmen_user_age', userAge.toString());
 
@@ -1093,7 +1093,7 @@
       }
     }
 
-    // Gửi kết quả & Polling kiểm tra trạng thái background worker
+    // Submit diagnostic payload & poll background worker status
     async function submitQuizToEngine() {
       const loading = document.getElementById('loadingOverlay');
       if (loading) loading.classList.add('active');
@@ -1108,7 +1108,7 @@
       const latestStoredName = localStorage.getItem('xmen_user_name');
       if (latestStoredName) userName = latestStoredName;
 
-      // 1. Tính toán tuổi chân tóc dự phòng cục bộ
+      // 1. Client-side fallback scalp stress age computation
       let exposurePoints = 0;
       const q1Ans = userAnswers['Q1'] || 'B';
       const q2Ans = userAnswers['Q2'] || 'B';
@@ -1145,7 +1145,7 @@
         const data = await res.json();
         const activeSid = (data && data.session_id) ? data.session_id : currentSessionId;
 
-        // Đã ghi DB thành công -> Chờ đúng 1s hiệu ứng rồi chuyển thẳng sang Story
+        // Database persistence confirmed -> Await 1s transition delay before routing to Story
         setTimeout(() => {
           finishFlow(activeSid);
         }, 1000);
