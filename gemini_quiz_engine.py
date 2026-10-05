@@ -70,7 +70,6 @@ def generate_deep_wrapped_payload(quiz_result: Dict[str, Any]) -> Dict[str, Any]
     user_case_file = build_xmen_case_file(quiz_result)
     arch = quiz_result.get("archetype", {})
     ans = quiz_result.get("raw_answers", {})
-    is_low_helmet = ans.get("Q1") == "A"
     arch_title = arch.get("title", "THE ROUTINE MAN")
 
     prompt = f'''
@@ -111,41 +110,3 @@ CHỈ TRẢ VỀ JSON THUẦN (KHÔNG MARKDOWN, KHÔNG ```json):
     "slide_3_grooming_gap": {{
       "headline": "The Grooming Gap",
       "body": "Bóc trần sự lệch pha giữa tiêu chuẩn lý tưởng và thực tế trong phòng tắm.",
-      "bad_habits": ["Ý 1 ngắn", "Ý 2 ngắn"],
-      "scalp_impacts": ["Tác động 1", "Tác động 2"],
-      "gap_desc": "Khoảng cách giữa tiêu chuẩn lý tưởng và hành vi tiện tay."
-    }},
-    "slide_4_final_card": {{
-      "archetype_title": "{arch_title}",
-      "subtitle": "Slogan phụ ngắn dí dỏm",
-      "quote": "Châm ngôn súc tích về bản lĩnh chăm sóc tóc",
-      "strength": "Điểm mạnh nổi bật nhất.",
-      "blind_spot": "Điểm mù cần khắc phục.",
-      "golden_advice": "Lời khuyên đắt giá giải quyết vấn đề từ gốc.",
-      "product_route": "{arch.get('product_route', 'routine_optimize')}"
-    }}
-  }}
-}}
-'''
-
-    if client:
-        with GEMINI_SEMAPHORE:
-            # Query fast Flash models sequentially with fallback
-            for model_name in ["gemini-2.5-flash", "gemini-1.5-flash"]:
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=prompt,
-                        config={
-                            "response_mime_type": "application/json",
-                            "temperature": 0.6,
-                            "max_output_tokens": 800,
-                        },
-                    )
-                    if response and response.text:
-                        cleaned_text = response.text.strip()
-                        if cleaned_text.startswith("```json"):
-                            cleaned_text = cleaned_text[7:]
-                        if cleaned_text.startswith("```"):
-                            cleaned_text = cleaned_text[3:]
-                        if cleaned_text.endswith("
